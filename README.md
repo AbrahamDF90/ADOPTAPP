@@ -54,3 +54,14 @@ php artisan test --filter=RegistroAdoptanteTest
 
 sudo apt install php8.4-pcov
 php artisan test --coverage
+
+## 🎨 Paleta de Colores Oficial (Branding ADOPTAPP)
+El diseño visual del sistema se basa en el logotipo oficial, utilizando una interfaz con modo oscuro (Dark Mode) para resaltar los colores de la marca.
+
+|Color            |    Código HEX   |   Clase Tailwind   | Uso principal                                                   |
+|   Negro         | #000000       | bg-black           | Fondo de la barra de navegación y layouts.                      |
+|   Verde Menta   | #6ee7b7       | text-emerald-400   | Color principal de la marca, botones de acción (CTA) y enlaces. |
+|   Rojo Coral    | #ef4444       | text-red-500       | Alertas, errores y acentos visuales del perro.                  |
+|   Celeste       | #38bdf8       | text-sky-400       | Acentos visuales secundarios.                                   |
+|   Amarillo      | #fbbf24       | text-amber-400     | Detalles y estados de advertencia.                              |
+
