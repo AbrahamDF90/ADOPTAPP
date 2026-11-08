@@ -37,3 +37,20 @@ Se diseñó un modelo relacional normalizado. Las tablas principales (`users`, `
 5. Ejecutar migraciones: `php artisan migrate --seed`
 6. Compilar frontend: `npm run build`
 7. Levantar servidor: `php artisan serve`
+
+## 🧪 Pruebas Automatizadas (Testing)
+El proyecto utiliza **Pest PHP** para garantizar la calidad del código y validar las reglas de negocio.
+
+### ¿Cómo ejecutar los tests?
+Para correr **toda** la suite de pruebas (recomendado antes de hacer un commit o PR):
+
+php artisan test
+
+### test especificos
+
+php artisan test --filter=NombreDelTest
+
+php artisan test --filter=RegistroAdoptanteTest
+
+sudo apt install php8.4-pcov
+php artisan test --coverage
