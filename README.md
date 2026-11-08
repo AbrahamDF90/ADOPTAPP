@@ -1,58 +1,39 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# ADOPTAPP - Sistema Web de Adopción Responsable de Mascotas
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Este proyecto es una plataforma web diseñada para centralizar la adopción de mascotas, conectando refugios con potenciales adoptantes mediante un proceso transparente y controlado.
 
-## About Laravel
+## 🛠️ Stack Tecnológico
+*   **Backend:** Laravel 13 (PHP 8.4.27)
+*   **Frontend:** Blade + Tailwind CSS + Vite
+*   **Base de Datos:** MariaDB
+*   **Servidor:** Debian 13 (VM en Proxmox) + Nginx
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🏗️ Arquitectura y Patrones de Diseño
+El sistema sigue una arquitectura **Monolito MVC** (Modelo-Vista-Controlador). Se aplicaron los siguientes patrones:
+*   **MVC:** Separación de responsabilidades entre la lógica de negocio (`app/Models`), la presentación (`resources/views`) y el control de peticiones (`app/Http/Controllers`).
+*   **Active Record:** Implementado a través de Eloquent ORM, donde cada tabla de la base de datos tiene su clase representativa (ej. `Publicacion::all()`).
+*   **Middleware (Cadena de Responsabilidad):** Uso de `RoleMiddleware` para interceptar peticiones HTTP y validar que el usuario tenga el rol adecuado (admin, refugio, adoptante) antes de acceder a rutas protegidas.
+*   **Dependency Injection:** Uso nativo de Laravel para inyectar dependencias como `Request` o servicios en los controladores, facilitando el testing.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 📋 Soluciones Implementadas (Sprint 1)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### HU-01: Infraestructura
+Se configuró una máquina virtual con Debian 13, Nginx como servidor web, PHP 8.4 y MariaDB. Se implementó un firewall (UFW) restringiendo el acceso a puertos específicos.
 
-## Learning Laravel
+### HU-02 y HU-03: Base de Datos y Control de Versiones
+Se diseñó un modelo relacional normalizado. Las tablas principales (`users`, `adoptantes`, `refugios`, `publicaciones`, `solicitudes`, `adopciones`) se crearon mediante **Migraciones** de Laravel para garantizar la portabilidad del esquema. Se utilizó Git con la estrategia de ramas `GitFlow` (`main`, `develop`, `dev/feature`).
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### HU-04, HU-05 y HU-06: Autenticación y Roles
+*   Se instaló **Laravel Breeze** para el scaffolding de autenticación.
+*   Se extendió el registro por defecto: mediante una **Transacción de Base de Datos (`DB::transaction`)**, al registrarse un usuario, se crean sus credenciales en `users` y su perfil (DNI, foto, dirección) en `adoptantes` de forma atómica (si falla uno, no se guarda el otro).
+*   Se implementó un **Middleware de roles** para proteger las rutas según el perfil.
+*   Se configuró el SMTP de Brevo (en `.env`) para el envío de correos de verificación y reseteo de contraseña.
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
-```
-
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 🚀 Instalación en Local
+1. Clonar el repositorio: `git clone ...`
+2. Instalar dependencias: `composer install` y `npm install`
+3. Copiar el entorno: `cp .env.example .env`
+4. Generar clave: `php artisan key:generate`
+5. Ejecutar migraciones: `php artisan migrate --seed`
+6. Compilar frontend: `npm run build`
+7. Levantar servidor: `php artisan serve`

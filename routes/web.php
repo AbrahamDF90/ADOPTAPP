@@ -18,3 +18,16 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+// Rutas de prueba para verificar el Middleware de Roles
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/admin/dashboard', function () {
+        return 'Panel de Administración (Solo Admin)';
+    });
+});
+
+Route::middleware(['auth', 'role:refugio'])->group(function () {
+    Route::get('/refugio/dashboard', function () {
+        return 'Panel de Refugio (Solo Refugios)';
+    });
+});
