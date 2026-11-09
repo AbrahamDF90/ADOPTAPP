@@ -93,3 +93,38 @@ Cada vez que tomes una HU de Jira/GitHub Projects, seguí este flujo estándar p
 5. **Documentar:** Comentar el código explicando el patrón de diseño usado.
 6. **Testing:** Si es lógica de negocio crítica, crear un test en Pest (`php artisan make:test --pest NombreTest`).
 7. **PR:** Hacer Push y Pull Request a `develop`.
+
+### HU-14: Galería Pública de Mascotas
+**Solución Implementada:**
+* Se creó el `HomeController` para manejar la página de inicio.
+* Se implementó una consulta con **Eager Loading** (`with('refugio')`) para optimizar el rendimiento (evita el problema N+1 de consultas SQL).
+* Se utiliza **Paginación Nativa** de Laravel (12 ítems por página) para no sobrecargar el servidor.
+* La vista se maquetó con **Tailwind CSS** usando CSS Grid (`grid-cols-1 md:grid-cols-4`) garantizando que sea 100% responsiva.
+
+**Patrones de Diseño Usados:**
+1. **MVC:** Separación entre controlador (`HomeController`), modelo (`Publicacion`) y vista (`welcome.blade.php`).
+2. **Active Record:** Uso de `Publicacion::with()->where()->paginate()`.
+
+**Deuda Técnica:**
+* Actualmente el botón "Ver Detalle" no redirige a ninguna parte (`href="#"`). Se resolverá en la siguiente HU (HU-15).
+
+### HU-15: Detalle de Publicación
+**Solución Implementada:**
+* Se implementó **Route Model Binding** en Laravel para capturar la publicación directamente desde la URL.
+* Se aplicó una validación de seguridad en el controlador: si la publicación no está `activa`, devuelve un error 404.
+* Vista responsiva de dos columnas (escritorio) / una columna (móvil) usando CSS Grid de Tailwind.
+
+**Patrones de Diseño:**
+1. **Route Model Binding:** Abstracción de la búsqueda en base de datos a nivel de enrutamiento.
+2. **MVC:** Separación del controlador (`HomeController@show`) y la vista (`publicaciones.show`).
+
+### HU-16: Creación de Solicitud de Adopción
+**Solución Implementada:**
+* Se implementó un Controlador (`SolicitudController`) para procesar el formulario de adopción.
+* Se aplicaron validaciones estrictas: el adoptante no puede duplicar solicitudes, y una publicación no puede superar las 3 solicitudes activas.
+* Se utilizó una **Transacción de Base de Datos (`DB::transaction`)** para guardar la solicitud y, si es la tercera, actualizar automáticamente el estado de la publicación a `completa` de forma segura.
+
+**Patrones de Diseño:**
+1. **Transaction Script:** Uso de `DB::transaction` para garantizar la integridad de los datos al cambiar el estado de la publicación.
+2. **Active Record:** Uso de los modelos `Solicitud` y `Publicacion`.
+3. **MVC:** El formulario (Vista) envía los datos al Controlador, que procesa y guarda en el Modelo.

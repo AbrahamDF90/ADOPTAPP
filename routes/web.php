@@ -2,12 +2,23 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\RefugioController;
+use App\Http\Controllers\Refugio\PublicacionController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\Adoptante\SolicitudController; // <-- NUEVO IMPORT
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// ==========================================
+// RUTAS PÚBLICAS (HU-14 y HU-15)
+// ==========================================
+// Patrón: MVC (Delega al HomeController)
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
+// Ruta de detalle (HU-15)
+Route::get('/publicaciones/{publicacion}', [HomeController::class, 'show'])->name('publicaciones.show');
+
+// ==========================================
+// RUTAS GENERALES (Usuarios autenticados)
+// ==========================================
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -16,6 +27,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// ==========================================
+// RUTAS DE ADOPTANTE (HU-16)
+// ==========================================
+Route::middleware(['auth', 'role:adoptante'])->group(function () {
+    // Ruta que recibe el formulario de "Solicitar Adopción"
+    Route::post('/publicaciones/{publicacion}/solicitar', [SolicitudController::class, 'store'])->name('solicitudes.store');
 });
 
 // ==========================================
@@ -30,19 +49,19 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::post('/refugios', [RefugioController::class, 'store'])->name('admin.refugios.store');
 });
 
-// ESTA LÍNEA ES VITAL PARA QUE FUNCIONE EL LOGIN
-require __DIR__.'/auth.php';
-
-use App\Http\Controllers\Refugio\PublicacionController;
-
-// Rutas para el Refugio
+// ==========================================
+// RUTAS DE REFUGIO (HU-11)
+// ==========================================
 Route::middleware(['auth', 'role:refugio'])->prefix('refugio')->group(function () {
-    // CAMBIAR ESTO:
     Route::get('/dashboard', function () {
-        return view('refugio.dashboard'); // <-- Ahora llama a la vista
+        return view('refugio.dashboard');
     })->name('refugio.dashboard');
 
-    // HU-11: Crear publicación
     Route::get('/publicaciones/crear', [PublicacionController::class, 'create'])->name('refugio.publicaciones.create');
     Route::post('/publicaciones', [PublicacionController::class, 'store'])->name('refugio.publicaciones.store');
 });
+
+// ==========================================
+// RUTAS DE AUTENTICACIÓN (Breeze)
+// ==========================================
+require __DIR__.'/auth.php';
