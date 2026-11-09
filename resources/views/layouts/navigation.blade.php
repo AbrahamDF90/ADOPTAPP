@@ -21,6 +21,20 @@
                             {{ __('Panel Admin') }}
                         </x-nav-link>
                     @endif
+
+                                        {{-- Botón para Admin --}}
+                    @if(auth()->user()->role === 'admin')
+                        <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')" class="text-gray-300 hover:text-emerald-400">
+                            {{ __('Panel Admin') }}
+                        </x-nav-link>
+                    @endif
+
+                    {{-- AGREGAR ESTO: Botón para Refugio --}}
+                    @if(auth()->user()->role === 'refugio')
+                        <x-nav-link :href="route('refugio.dashboard')" :active="request()->routeIs('refugio.dashboard')" class="text-gray-300 hover:text-emerald-400">
+                            {{ __('Panel Refugio') }}
+                        </x-nav-link>
+                    @endif
                 </div>
             </div>
 

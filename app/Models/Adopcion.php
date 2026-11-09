@@ -9,6 +9,8 @@ class Adopcion extends Model
 {
     use HasFactory;
 
+    protected $table = 'adopciones';
+
     protected $fillable = ['publicacion_id', 'adoptante_id', 'estado_adopcion', 'motivo_cancelacion', 'estado_mascota', 'fecha_adopcion'];
 
     public function publicacion()
