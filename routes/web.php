@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Admin\RefugioController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -17,17 +18,17 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// ==========================================
+// RUTAS DE ADMINISTRADOR (HU-9)
+// ==========================================
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('admin.dashboard');
+    })->name('admin.dashboard');
+
+    Route::get('/refugios/crear', [RefugioController::class, 'create'])->name('admin.refugios.create');
+    Route::post('/refugios', [RefugioController::class, 'store'])->name('admin.refugios.store');
+});
+
+// ESTA LÍNEA ES VITAL PARA QUE FUNCIONE EL LOGIN
 require __DIR__.'/auth.php';
-
-// Rutas de prueba para verificar el Middleware de Roles
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/admin/dashboard', function () {
-        return 'Panel de Administración (Solo Admin)';
-    });
-});
-
-Route::middleware(['auth', 'role:refugio'])->group(function () {
-    Route::get('/refugio/dashboard', function () {
-        return 'Panel de Refugio (Solo Refugios)';
-    });
-});
