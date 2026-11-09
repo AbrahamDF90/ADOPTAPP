@@ -20,7 +20,18 @@ class RegisteredUserController extends Controller
     {
         return view('auth.register');
     }
-
+        /**
+     * Maneja la creación de un nuevo Adoptante en el sistema.
+     * 
+     * Patrones aplicados: 
+     * - Dependency Injection: Se inyecta el objeto Request.
+     * - Active Record: Uso de Eloquent para guardar los datos.
+     * - Transacción DB: Garantiza la integridad de los datos. Si la creación 
+     *   del perfil falla, se hace un rollback y no se crea el usuario.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function store(Request $request): RedirectResponse
     {
         // 1. Validamos todos los datos (incluyendo los nuevos)
