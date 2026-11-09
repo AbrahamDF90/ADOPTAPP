@@ -32,7 +32,7 @@
                             <p class="text-sm text-gray-500 mb-2">{{ $publicacion->sexo }} • {{ $publicacion->edad_aproximada }}</p>
                             <p class="text-xs text-emerald-600 font-semibold mb-4">Refugio: {{ $publicacion->refugio->nombre }}</p>
                             
-                            <a href="#" class="block text-center w-full bg-gray-900 text-white py-2 rounded-lg hover:bg-gray-800 transition">
+                            <a href="{{ route('publicaciones.show', $publicacion) }}" class="block text-center w-full bg-gray-900 text-white py-2 rounded-lg hover:bg-gray-800 transition">
                                 Ver Detalle
                             </a>
                         </div>

@@ -108,3 +108,12 @@ Cada vez que tomes una HU de Jira/GitHub Projects, seguí este flujo estándar p
 **Deuda Técnica:**
 * Actualmente el botón "Ver Detalle" no redirige a ninguna parte (`href="#"`). Se resolverá en la siguiente HU (HU-15).
 
+### HU-15: Detalle de Publicación
+**Solución Implementada:**
+* Se implementó **Route Model Binding** en Laravel, permitiendo que el controlador reciba el objeto `Publicacion` directamente en lugar de buscar por ID manualmente (ej. `Publicacion::find($id)`).
+* La vista cuenta con un diseño responsivo de dos columnas para escritorio y una sola para móviles.
+* Se validó la regla de negocio: si la publicación no está en estado 'activa', el sistema devuelve un error 404.
+
+**Patrones de Diseño:**
+1. **Route Model Binding:** Abstracción de la búsqueda en base de datos a nivel de enrutamiento.
+2. **MVC:** Controlador (`HomeController@show`) -> Vista (`publicaciones.show`).

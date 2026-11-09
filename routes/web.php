@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\Route;
 // Patrón: MVC (Delega al HomeController)
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
+// Ruta de detalle (HU-15)
+Route::get('/publicaciones/{publicacion}', [HomeController::class, 'show'])->name('publicaciones.show');
+
 // ==========================================
 // RUTAS GENERALES (Usuarios autenticados)
 // ==========================================
