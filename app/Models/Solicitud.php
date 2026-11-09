@@ -10,6 +10,8 @@ class Solicitud extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'solicitudes';
+
     protected $fillable = ['publicacion_id', 'adoptante_id', 'estado', 'fecha_entrevista', 'motivo_cierre'];
 
     public function publicacion()
