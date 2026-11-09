@@ -110,10 +110,21 @@ Cada vez que tomes una HU de Jira/GitHub Projects, seguí este flujo estándar p
 
 ### HU-15: Detalle de Publicación
 **Solución Implementada:**
-* Se implementó **Route Model Binding** en Laravel, permitiendo que el controlador reciba el objeto `Publicacion` directamente en lugar de buscar por ID manualmente (ej. `Publicacion::find($id)`).
-* La vista cuenta con un diseño responsivo de dos columnas para escritorio y una sola para móviles.
-* Se validó la regla de negocio: si la publicación no está en estado 'activa', el sistema devuelve un error 404.
+* Se implementó **Route Model Binding** en Laravel para capturar la publicación directamente desde la URL.
+* Se aplicó una validación de seguridad en el controlador: si la publicación no está `activa`, devuelve un error 404.
+* Vista responsiva de dos columnas (escritorio) / una columna (móvil) usando CSS Grid de Tailwind.
 
 **Patrones de Diseño:**
 1. **Route Model Binding:** Abstracción de la búsqueda en base de datos a nivel de enrutamiento.
-2. **MVC:** Controlador (`HomeController@show`) -> Vista (`publicaciones.show`).
+2. **MVC:** Separación del controlador (`HomeController@show`) y la vista (`publicaciones.show`).
+
+### HU-16: Creación de Solicitud de Adopción
+**Solución Implementada:**
+* Se implementó un Controlador (`SolicitudController`) para procesar el formulario de adopción.
+* Se aplicaron validaciones estrictas: el adoptante no puede duplicar solicitudes, y una publicación no puede superar las 3 solicitudes activas.
+* Se utilizó una **Transacción de Base de Datos (`DB::transaction`)** para guardar la solicitud y, si es la tercera, actualizar automáticamente el estado de la publicación a `completa` de forma segura.
+
+**Patrones de Diseño:**
+1. **Transaction Script:** Uso de `DB::transaction` para garantizar la integridad de los datos al cambiar el estado de la publicación.
+2. **Active Record:** Uso de los modelos `Solicitud` y `Publicacion`.
+3. **MVC:** El formulario (Vista) envía los datos al Controlador, que procesa y guarda en el Modelo.

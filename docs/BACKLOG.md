@@ -23,7 +23,7 @@ Este documento es la hoja de ruta del proyecto.
 *   **HU-15 ✅ (Detalle Público):** Visitante ve detalle. Botón "Solicitar adopción" (solo adoptantes logueados).
 
 ## 🏃‍♂️ Sprint 3: Solicitudes de Adopción
-*   **HU-16 ⏳ (Crear Solicitud):** Adoptante solicita (máx 3 por publicación). Al llegar a 3, publicación pasa a `completa`.
+*   **HU-16 ✅ (Crear Solicitud):** Adoptante solicita (máx 3 por publicación). Al llegar a 3, publicación pasa a `completa`.
 *   **HU-17 ⏳ (Cancelar Solicitud):** Adoptante cancela solicitud `pendiente`. Si estaba `completa`, vuelve a `activa`.
 *   **HU-18 ⏳ (Ver Solicitudes Adoptante):** Adoptante ve su lista de solicitudes y su estado.
 

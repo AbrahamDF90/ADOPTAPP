@@ -4,10 +4,11 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\RefugioController;
 use App\Http\Controllers\Refugio\PublicacionController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\Adoptante\SolicitudController; // <-- NUEVO IMPORT
 use Illuminate\Support\Facades\Route;
 
 // ==========================================
-// RUTAS PÚBLICAS (HU-14)
+// RUTAS PÚBLICAS (HU-14 y HU-15)
 // ==========================================
 // Patrón: MVC (Delega al HomeController)
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -26,6 +27,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// ==========================================
+// RUTAS DE ADOPTANTE (HU-16)
+// ==========================================
+Route::middleware(['auth', 'role:adoptante'])->group(function () {
+    // Ruta que recibe el formulario de "Solicitar Adopción"
+    Route::post('/publicaciones/{publicacion}/solicitar', [SolicitudController::class, 'store'])->name('solicitudes.store');
 });
 
 // ==========================================

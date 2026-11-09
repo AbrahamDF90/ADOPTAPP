@@ -38,9 +38,22 @@
                         @auth
                             {{-- Si el usuario está logueado y es adoptante, ve el botón de solicitar --}}
                             @if(auth()->user()->role === 'adoptante')
-                                <button class="w-full bg-emerald-600 text-white py-3 rounded-lg font-bold hover:bg-emerald-700 transition">
-                                    Solicitar Adopción (HU-16)
-                                </button>
+                                
+                                <form method="POST" action="{{ route('solicitudes.store', $publicacion) }}">
+                                    @csrf
+                                    <button type="submit" class="w-full bg-emerald-600 text-white py-3 rounded-lg font-bold hover:bg-emerald-700 transition">
+                                        Solicitar Adopción
+                                    </button>
+                                </form>
+
+                                {{-- Mostrar mensajes de error o éxito --}}
+                                @if(session('error'))
+                                    <div class="mt-4 bg-red-100 text-red-800 p-3 rounded text-sm">{{ session('error') }}</div>
+                                @endif
+                                @if(session('success'))
+                                    <div class="mt-4 bg-emerald-100 text-emerald-800 p-3 rounded text-sm">{{ session('success') }}</div>
+                                @endif
+
                             @else
                                 <p class="text-center text-sm text-gray-500">Solo los adoptantes pueden solicitar.</p>
                             @endif
