@@ -2,14 +2,19 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\RefugioController;
+use App\Http\Controllers\Refugio\PublicacionController;
+use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
-// Ruta pública para la galería (Patrón MVC)
+// ==========================================
+// RUTAS PÚBLICAS (HU-14)
+// ==========================================
+// Patrón: MVC (Delega al HomeController)
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
+// ==========================================
+// RUTAS GENERALES (Usuarios autenticados)
+// ==========================================
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -32,19 +37,19 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::post('/refugios', [RefugioController::class, 'store'])->name('admin.refugios.store');
 });
 
-// ESTA LÍNEA ES VITAL PARA QUE FUNCIONE EL LOGIN
-require __DIR__.'/auth.php';
-
-use App\Http\Controllers\Refugio\PublicacionController;
-
-// Rutas para el Refugio
+// ==========================================
+// RUTAS DE REFUGIO (HU-11)
+// ==========================================
 Route::middleware(['auth', 'role:refugio'])->prefix('refugio')->group(function () {
-    // CAMBIAR ESTO:
     Route::get('/dashboard', function () {
-        return view('refugio.dashboard'); // <-- Ahora llama a la vista
+        return view('refugio.dashboard');
     })->name('refugio.dashboard');
 
-    // HU-11: Crear publicación
     Route::get('/publicaciones/crear', [PublicacionController::class, 'create'])->name('refugio.publicaciones.create');
     Route::post('/publicaciones', [PublicacionController::class, 'store'])->name('refugio.publicaciones.store');
 });
+
+// ==========================================
+// RUTAS DE AUTENTICACIÓN (Breeze)
+// ==========================================
+require __DIR__.'/auth.php';

@@ -8,8 +8,8 @@
 </head>
 <body class="font-sans antialiased bg-gray-50">
     <div class="min-h-screen">
+        
         <!-- Incluimos la barra de navegación (la negra con tu logo) -->
-        <x-banner /> 
         @include('layouts.navigation')
 
         <!-- Encabezado Principal -->
@@ -20,19 +20,16 @@
 
         <!-- Galería de Mascotas -->
         <main class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-            {{-- Grilla responsiva de Tailwind: 1 col en móvil, hasta 4 en escritorio --}}
+            {{-- Grilla responsiva de Tailwind --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 
-                {{-- Directiva Blade para iterar sobre la colección paginada --}}
                 @forelse($publicaciones as $publicacion)
                     <!-- Tarjeta de Mascota -->
                     <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition duration-300">
-                        {{-- asset('storage/...') genera la URL pública de la imagen --}}
                         <img src="{{ asset('storage/' . $publicacion->foto) }}" alt="Mascota" class="w-full h-48 object-cover">
                         <div class="p-4">
                             <h3 class="text-xl font-bold text-gray-800">{{ $publicacion->especie }}</h3>
                             <p class="text-sm text-gray-500 mb-2">{{ $publicacion->sexo }} • {{ $publicacion->edad_aproximada }}</p>
-                            {{-- Relación Eager Loaded: accedemos al nombre del refugio sin nueva consulta --}}
                             <p class="text-xs text-emerald-600 font-semibold mb-4">Refugio: {{ $publicacion->refugio->nombre }}</p>
                             
                             <a href="#" class="block text-center w-full bg-gray-900 text-white py-2 rounded-lg hover:bg-gray-800 transition">
@@ -41,7 +38,6 @@
                         </div>
                     </div>
                 @empty
-                    {{-- Fallback si no hay mascotas --}}
                     <div class="col-span-4 text-center py-12">
                         <p class="text-gray-500 text-lg">No hay mascotas en adopción por el momento. ¡Volvé pronto!</p>
                     </div>
@@ -49,7 +45,7 @@
 
             </div>
 
-            <!-- Paginación (Laravel genera los enlaces automáticamente) -->
+            <!-- Paginación -->
             <div class="mt-8">
                 {{ $publicaciones->links() }}
             </div>

@@ -93,3 +93,18 @@ Cada vez que tomes una HU de Jira/GitHub Projects, seguí este flujo estándar p
 5. **Documentar:** Comentar el código explicando el patrón de diseño usado.
 6. **Testing:** Si es lógica de negocio crítica, crear un test en Pest (`php artisan make:test --pest NombreTest`).
 7. **PR:** Hacer Push y Pull Request a `develop`.
+
+### HU-14: Galería Pública de Mascotas
+**Solución Implementada:**
+* Se creó el `HomeController` para manejar la página de inicio.
+* Se implementó una consulta con **Eager Loading** (`with('refugio')`) para optimizar el rendimiento (evita el problema N+1 de consultas SQL).
+* Se utiliza **Paginación Nativa** de Laravel (12 ítems por página) para no sobrecargar el servidor.
+* La vista se maquetó con **Tailwind CSS** usando CSS Grid (`grid-cols-1 md:grid-cols-4`) garantizando que sea 100% responsiva.
+
+**Patrones de Diseño Usados:**
+1. **MVC:** Separación entre controlador (`HomeController`), modelo (`Publicacion`) y vista (`welcome.blade.php`).
+2. **Active Record:** Uso de `Publicacion::with()->where()->paginate()`.
+
+**Deuda Técnica:**
+* Actualmente el botón "Ver Detalle" no redirige a ninguna parte (`href="#"`). Se resolverá en la siguiente HU (HU-15).
+
