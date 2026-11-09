@@ -19,7 +19,7 @@ Este documento es la hoja de ruta del proyecto.
 *   **HU-11 ⏳ (Crear Publicación):** Refugio sube foto de mascota. Datos: especie, sexo, edad aprox. Estado inicial: `activa`. *Ruta: `refugio/publicaciones/create`*.
 *   **HU-12 ⏳ (Editar Publicación):** Refugio edita foto o datos de su publicación.
 *   **HU-13 ⏳ (Baja Publicación):** Refugio da de baja lógica una publicación con un motivo (ej: falleció).
-*   **HU-14 ⏳ (Listado Público):** Visitantes ven publicaciones `activas`. Filtros: especie, sexo, ubicación. Paginación de 12.
+*   **HU-14 ✅ (Listado Público):** Visitantes ven publicaciones `activas`. Paginación de 12. (Faltan filtros).
 *   **HU-15 ⏳ (Detalle Público):** Visitante ve detalle. Botón "Solicitar adopción" (solo adoptantes logueados).
 
 ## 🏃‍♂️ Sprint 3: Solicitudes de Adopción

@@ -4,6 +4,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\RefugioController;
 use Illuminate\Support\Facades\Route;
 
+// Ruta pública para la galería (Patrón MVC)
+
 Route::get('/', function () {
     return view('welcome');
 });
