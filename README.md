@@ -56,3 +56,16 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+
+## 🏗️ HU-09: Creación de Refugios por el Administrador
+
+### Patrones de Diseño Aplicados
+1. **MVC (Model-View-Controller):** Se separó la lógica en un Controlador (`RefugioController`), dos Modelos (`User` y `Refugio`) y una Vista (`create.blade.php`).
+2. **Transaction Script:** Se utilizó `DB::transaction()` en el método `store`. Este patrón garantiza que la creación del Usuario y del Refugio se ejecuten como una unidad atómica. Si algo falla, se hace un *rollback* automático, evitando datos huérfanos.
+3. **Active Record:** Los modelos `User` y `Refugio` abstraen las consultas SQL, permitiendo crear registros usando métodos orientados a objetos (`User::create()`).
+
+### Análisis de Deuda Técnica (Trade-offs)
+* **Deuda Asumida:** Toda la lógica de negocio (validación y creación) está en el Controlador (conocido como *Fat Controller*).
+* **Justificación:** Para un flujo CRUD simple, mantenerlo en el controlador es rápido y legible.
+* **Solución Futura (Escalabilidad):** Si el alta de un refugio requiere más pasos (ej. enviar correo de bienvenida, generar un slug único, asignar plan), se deberá refactorizar aplicando el **Patrón Service** (capa de servicios) o **Action Pattern**, moviendo la lógica a una clase dedicada (ej. `CreateRefugioAction`). Esto respetará el Principio de Responsabilidad Única (SRP) de SOLID.
