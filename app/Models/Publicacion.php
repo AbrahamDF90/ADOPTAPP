@@ -10,6 +10,9 @@ class Publicacion extends Model
 {
     use HasFactory, SoftDeletes;
 
+    // Le decimos a Laravel el nombre exacto de la tabla
+    protected $table = 'publicaciones';
+
     protected $fillable = ['refugio_id', 'foto', 'especie', 'sexo', 'edad_aproximada', 'estado', 'motivo_baja'];
 
     public function refugio()

@@ -77,3 +77,54 @@ El diseño visual del sistema se basa en el logotipo oficial, utilizando una int
 * **Deuda Asumida:** Toda la lógica de negocio (validación y creación) está en el Controlador (conocido como *Fat Controller*).
 * **Justificación:** Para un flujo CRUD simple, mantenerlo en el controlador es rápido y legible.
 * **Solución Futura (Escalabilidad):** Si el alta de un refugio requiere más pasos (ej. enviar correo de bienvenida, generar un slug único, asignar plan), se deberá refactorizar aplicando el **Patrón Service** (capa de servicios) o **Action Pattern**, moviendo la lógica a una clase dedicada (ej. `CreateRefugioAction`). Esto respetará el Principio de Responsabilidad Única (SRP) de SOLID.
+
+## 🤝 Guía para Nuevos Desarrolladores (Onboarding)
+
+¡Bienvenido al equipo de ADOPTAPP! Para empezar a codificar, es **obligatorio** leer los siguientes documentos en la carpeta `/docs`:
+1. `docs/ARQUITECTURA.md`: Entender el stack, los patrones de diseño y las reglas de escalabilidad (SOLID).
+2. `docs/REGLAS_CODIGO.md`: Normas de comentarios y documentación.
+
+### 🛠️ Flujo de trabajo por Historia de Usuario (HU)
+Cada vez que tomes una HU de Jira/GitHub Projects, seguí este flujo estándar para no romper el sistema:
+1. **Crear Rama:** `git checkout -b dev/nombre-tarea` desde `develop`.
+2. **Backend (Lógica):** Crear el Controlador en `app/Http/Controllers/` y la lógica de base de datos.
+3. **Frontend (Vistas):** Crear el archivo Blade en `resources/views/rol/entidad/` (ej: `admin/refugios/create.blade.php`).
+4. **Rutas:** Registrar la ruta en `routes/web.php` (protegida por el Middleware correspondiente).
+5. **Documentar:** Comentar el código explicando el patrón de diseño usado.
+6. **Testing:** Si es lógica de negocio crítica, crear un test en Pest (`php artisan make:test --pest NombreTest`).
+7. **PR:** Hacer Push y Pull Request a `develop`.
+
+### HU-14: Galería Pública de Mascotas
+**Solución Implementada:**
+* Se creó el `HomeController` para manejar la página de inicio.
+* Se implementó una consulta con **Eager Loading** (`with('refugio')`) para optimizar el rendimiento (evita el problema N+1 de consultas SQL).
+* Se utiliza **Paginación Nativa** de Laravel (12 ítems por página) para no sobrecargar el servidor.
+* La vista se maquetó con **Tailwind CSS** usando CSS Grid (`grid-cols-1 md:grid-cols-4`) garantizando que sea 100% responsiva.
+
+**Patrones de Diseño Usados:**
+1. **MVC:** Separación entre controlador (`HomeController`), modelo (`Publicacion`) y vista (`welcome.blade.php`).
+2. **Active Record:** Uso de `Publicacion::with()->where()->paginate()`.
+
+**Deuda Técnica:**
+* Actualmente el botón "Ver Detalle" no redirige a ninguna parte (`href="#"`). Se resolverá en la siguiente HU (HU-15).
+
+### HU-15: Detalle de Publicación
+**Solución Implementada:**
+* Se implementó **Route Model Binding** en Laravel para capturar la publicación directamente desde la URL.
+* Se aplicó una validación de seguridad en el controlador: si la publicación no está `activa`, devuelve un error 404.
+* Vista responsiva de dos columnas (escritorio) / una columna (móvil) usando CSS Grid de Tailwind.
+
+**Patrones de Diseño:**
+1. **Route Model Binding:** Abstracción de la búsqueda en base de datos a nivel de enrutamiento.
+2. **MVC:** Separación del controlador (`HomeController@show`) y la vista (`publicaciones.show`).
+
+### HU-16: Creación de Solicitud de Adopción
+**Solución Implementada:**
+* Se implementó un Controlador (`SolicitudController`) para procesar el formulario de adopción.
+* Se aplicaron validaciones estrictas: el adoptante no puede duplicar solicitudes, y una publicación no puede superar las 3 solicitudes activas.
+* Se utilizó una **Transacción de Base de Datos (`DB::transaction`)** para guardar la solicitud y, si es la tercera, actualizar automáticamente el estado de la publicación a `completa` de forma segura.
+
+**Patrones de Diseño:**
+1. **Transaction Script:** Uso de `DB::transaction` para garantizar la integridad de los datos al cambiar el estado de la publicación.
+2. **Active Record:** Uso de los modelos `Solicitud` y `Publicacion`.
+3. **MVC:** El formulario (Vista) envía los datos al Controlador, que procesa y guarda en el Modelo.
