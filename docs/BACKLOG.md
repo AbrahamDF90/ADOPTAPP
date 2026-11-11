@@ -16,7 +16,7 @@ Este documento es la hoja de ruta del proyecto.
 *   **HU-07 ⏳ (Perfil Adoptante):** El adoptante puede editar su foto, alias, dirección y teléfono. (No puede editar DNI). *Ruta sugerida: `adoptante/perfil/edit`*.
 *   **HU-08 ⏳ (Baja Adoptante):** El adoptante puede darse de baja (SoftDelete). Sus solicitudes pendientes se cancelan. Al volver a registrarse con el mismo DNI, recupera historial.
 *   **HU-10 ⏳ (Editar/Bloquear Refugio):** Admin puede editar datos del refugio o bloquearlo (si se bloquea, sus publicaciones pasan a estado "baja").
-*   **HU-11 ⏳ (Crear Publicación):** Refugio sube foto de mascota. Datos: especie, sexo, edad aprox. Estado inicial: `activa`. *Ruta: `refugio/publicaciones/create`*.
+*   **HU-11 ✅ (Crear Publicación):** Refugio sube foto de mascota...create`*.
 *   **HU-12 ⏳ (Editar Publicación):** Refugio edita foto o datos de su publicación.
 *   **HU-13 ⏳ (Baja Publicación):** Refugio da de baja lógica una publicación con un motivo (ej: falleció).
 *   **HU-14 ✅ (Listado Público):** Visitantes ven publicaciones `activas`. Paginación de 12.
@@ -25,7 +25,7 @@ Este documento es la hoja de ruta del proyecto.
 ## 🏃‍♂️ Sprint 3: Solicitudes de Adopción
 *   **HU-16 ✅ (Crear Solicitud):** Adoptante solicita (máx 3 por publicación). Al llegar a 3, publicación pasa a `completa`.
 *   **HU-17 ⏳ (Cancelar Solicitud):** Adoptante cancela solicitud `pendiente`. Si estaba `completa`, vuelve a `activa`.
-*   **HU-18 ⏳ (Ver Solicitudes Adoptante):** Adoptante ve su lista de solicitudes y su estado.
+*   **HU-18 ✅ (Ver Solicitudes Adoptante):** Adoptante ve su lista de solicitudes y su estado.
 
 ## 🏃‍♂️ Sprint 4: Flujo de Adopción y Notificaciones
 *   **HU-19 ⏳ (Gestionar Solicitudes Refugio):** Refugio ve las solicitudes de sus publicaciones. Ve ficha completa del adoptante.
