@@ -42,3 +42,6 @@ Este documento es la hoja de ruta del proyecto.
 *   **HU-28 ⏳ (Estadísticas):** Dashboards con métricas para Admin y Refugio.
 *   **HU-29 ⏳ (Documentación Final):** Manual de usuario, UML, Gantt, etc.
 *   **HU-30 ⏳ (Deploy Final):** Puesta en producción y pruebas finales.
+
+## 🏃‍♂️ Bug fix
+*   **HU-31 ✅ (CI/CD):** Se configuró CI/CD con GitHub Actions. El pipeline bloquea PRs si los tests fallan o si no se usa RefreshDatabase en tests que consultan la BD.
