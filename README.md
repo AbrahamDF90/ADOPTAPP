@@ -128,3 +128,13 @@ Cada vez que tomes una HU de Jira/GitHub Projects, seguí este flujo estándar p
 1. **Transaction Script:** Uso de `DB::transaction` para garantizar la integridad de los datos al cambiar el estado de la publicación.
 2. **Active Record:** Uso de los modelos `Solicitud` y `Publicacion`.
 3. **MVC:** El formulario (Vista) envía los datos al Controlador, que procesa y guarda en el Modelo.
+
+### HU-18: Ver Solicitudes del Adoptante
+**Solución Implementada:**
+* Se creó el `DashboardController` para el perfil del adoptante.
+* Se implementó **Eager Loading** (`with('publicacion')`) para cargar los datos de las mascotas solicitadas sin hacer consultas N+1 a la base de datos.
+* La vista utiliza **Tailwind CSS** para las tarjetas de estado, mostrando badges de diferentes colores (amarillo para pendiente, verde para aceptada) y es 100% responsiva (flex-col en móviles, flex-row en escritorio).
+
+**Patrones de Diseño:**
+1. **MVC:** Separación de la lógica (`DashboardController`), datos (`Solicitud`) y presentación (`adoptante.dashboard`).
+2. **Active Record:** Uso de la relación `$adoptante->solicitudes()`.
