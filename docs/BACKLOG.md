@@ -28,7 +28,7 @@ Este documento es la hoja de ruta del proyecto.
 *   **HU-18 ✅ (Ver Solicitudes Adoptante):** Adoptante ve su lista de solicitudes y su estado.
 
 ## 🏃‍♂️ Sprint 4: Flujo de Adopción y Notificaciones
-*   **HU-19 ⏳ (Gestionar Solicitudes Refugio):** Refugio ve las solicitudes de sus publicaciones. Ve ficha completa del adoptante.
+*   **HU-19 🚧 (Gestionar Solicitudes Refugio):** Refugio ve las solicitudes de sus publicaciones. Ve ficha completa del adoptante.
 *   **HU-20 ⏳ (Aceptar Solicitud):** Refugio acepta. Publicación pasa a `adoptada`. Otras 2 se cierran. Crea registro en tabla `adopciones`.
 *   **HU-21 ⏳ (Revertir Aceptación):** Refugio cancela adopción si no se concretó. Publicación vuelve a `completa`.
 *   **HU-22 ⏳ (Estado Post-Adopción):** Refugio marca estado de mascota (fallecida, robada, etc.).

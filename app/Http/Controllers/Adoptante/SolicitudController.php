@@ -12,13 +12,13 @@ class SolicitudController extends Controller
 {
     /**
      * Guarda una nueva solicitud de adopción para una publicación.
-     * 
+     *
      * Patrones de Diseño aplicados:
-     * 1. Transaction Script: Usamos DB::transaction para asegurar que el conteo de solicitudes 
+     * 1. Transaction Script: Usamos DB::transaction para asegurar que el conteo de solicitudes
      *    y la creación de la nueva se hagan de forma atómica y sin errores de concurrencia.
      * 2. Active Record: Uso de los modelos Solicitud y Publicacion.
      * 3. Middleware: La ruta estará protegida para que solo los adoptantes logueados accedan.
-     * 
+     *
      * Reglas de Negocio:
      * - No duplicar solicitudes del mismo adoptante.
      * - Máximo 3 solicitudes por publicación.
@@ -53,7 +53,7 @@ class SolicitudController extends Controller
 
         // 4. Transacción para guardar y actualizar estado
         DB::transaction(function () use ($publicacion, $adoptante, $solicitudesActivas) {
-            
+
             // Creamos la solicitud
             Solicitud::create([
                 'publicacion_id' => $publicacion->id,

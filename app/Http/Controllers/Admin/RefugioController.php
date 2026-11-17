@@ -3,17 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Refugio;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class RefugioController extends Controller
 {
     /**
      * Muestra el formulario para dar de alta un nuevo Refugio.
-     * 
+     *
      * Patrón de Diseño: MVC (Model-View-Controller) - Delega la vista.
      */
     public function create()
@@ -24,8 +24,8 @@ class RefugioController extends Controller
 
     /**
      * Procesa, valida y guarda los datos del nuevo Refugio.
-     * 
-     * Patrones de Diseño: 
+     *
+     * Patrones de Diseño:
      * 1. Active Record: Uso de los modelos User y Refugio para interactuar con la BD.
      * 2. Transaction Script: Uso de DB::transaction para garantizar atomicidad.
      */
@@ -41,10 +41,10 @@ class RefugioController extends Controller
             'telefono' => ['required', 'string', 'max:50'],
         ]);
 
-        // Patrón Transaction Script: 
+        // Patrón Transaction Script:
         // Si falla la creación del Refugio, se cancela (rollback) la del Usuario, y viceversa.
         DB::transaction(function () use ($request) {
-            
+
             // 1. Creamos el Usuario (credenciales de login)
             $user = User::create([
                 'name' => $request->nombre,

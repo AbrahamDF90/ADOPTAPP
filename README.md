@@ -138,3 +138,20 @@ Cada vez que tomes una HU de Jira/GitHub Projects, seguí este flujo estándar p
 **Patrones de Diseño:**
 1. **MVC:** Separación de la lógica (`DashboardController`), datos (`Solicitud`) y presentación (`adoptante.dashboard`).
 2. **Active Record:** Uso de la relación `$adoptante->solicitudes()`.
+
+### HU-19: Gestión de Solicitudes por Refugio
+**Solución Implementada:**
+* Se creó el controlador `Refugio\SolicitudRefugioController` con métodos `index` y `show`.
+* Se aplicó **Eager Loading** (`with(['publicacion','adoptante.user'])`) para evitar consultas N+1 y optimizar el rendimiento.
+* **Seguridad:** Se implementó una validación en el método `show` para que el refugio solo pueda ver las solicitudes de sus propias publicaciones (retorna 403 si intenta ver una ajena).
+* Se agregó un filtro opcional por estado de la solicitud.
+* Las vistas utilizan Tailwind CSS y son responsivas.
+
+**Patrones de Diseño:**
+1. **MVC:** Separación de responsabilidades entre el controlador, los modelos y las vistas.
+2. **Active Record:** Uso de las relaciones de Eloquent (`$solicitud->adoptante->user`).
+3. **Route Model Binding:** El método `show` recibe automáticamente la `Solicitud` desde la URL.
+4. **Eager Loading:** Uso de `with()` para cargar relaciones de forma eficiente.
+
+**Deuda Técnica:**
+* Las acciones para que el refugio acepte o rechace la solicitud (botones de acción) se implementarán en las HUs 20 y 21.
