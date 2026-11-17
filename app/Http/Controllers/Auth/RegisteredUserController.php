@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Adoptante;
+use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
@@ -20,17 +20,15 @@ class RegisteredUserController extends Controller
     {
         return view('auth.register');
     }
-        /**
+
+    /**
      * Maneja la creación de un nuevo Adoptante en el sistema.
-     * 
-     * Patrones aplicados: 
+     *
+     * Patrones aplicados:
      * - Dependency Injection: Se inyecta el objeto Request.
      * - Active Record: Uso de Eloquent para guardar los datos.
-     * - Transacción DB: Garantiza la integridad de los datos. Si la creación 
+     * - Transacción DB: Garantiza la integridad de los datos. Si la creación
      *   del perfil falla, se hace un rollback y no se crea el usuario.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request): RedirectResponse
     {
@@ -47,7 +45,7 @@ class RegisteredUserController extends Controller
 
         // 2. Usamos una transacción para guardar en las 2 tablas al mismo tiempo
         DB::transaction(function () use ($request) {
-            
+
             // Guardamos la foto en el disco
             $rutaFoto = $request->file('foto')->store('perfiles', 'public');
 

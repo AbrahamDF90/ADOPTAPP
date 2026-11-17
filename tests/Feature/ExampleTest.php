@@ -14,9 +14,9 @@ class ExampleTest extends TestCase
     /**
      * Test básico de humo (Smoke Test).
      * Verifica que la página principal responda con un estado 200 OK.
-     * 
+     *
      * Patrón aplicado: Arrange-Act-Assert (Preparar, Actuar, Verificar).
-     * Gracias a RefreshDatabase, la consulta a la tabla 'publicaciones' 
+     * Gracias a RefreshDatabase, la consulta a la tabla 'publicaciones'
      * de HomeController no fallará por falta de tablas.
      */
     public function test_the_application_returns_a_successful_response(): void

@@ -1,12 +1,13 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\RefugioController;
-use App\Http\Controllers\Refugio\PublicacionController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\Adoptante\SolicitudController; // <-- NUEVO IMPORT
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Adoptante\DashboardController;
+use App\Http\Controllers\Adoptante\SolicitudController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ProfileController; // <-- NUEVO IMPORT
+use App\Http\Controllers\Refugio\PublicacionController;
+use App\Http\Controllers\Refugio\SolicitudRefugioController;
+use Illuminate\Support\Facades\Route;
 
 // ==========================================
 // RUTAS PÚBLICAS (HU-14 y HU-15)
@@ -35,10 +36,10 @@ Route::middleware('auth')->group(function () {
 // ==========================================
 // Patrón: Middleware (protege las rutas para que solo entren adoptantes)
 Route::middleware(['auth', 'role:adoptante'])->prefix('mi-perfil')->group(function () {
-    
+
     // HU-18: Panel de solicitudes del adoptante
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('adoptante.dashboard');
-    
+
     // HU-16: Procesar la solicitud
     Route::post('/publicaciones/{publicacion}/solicitar', [SolicitudController::class, 'store'])->name('solicitudes.store');
 });
@@ -71,3 +72,12 @@ Route::middleware(['auth', 'role:refugio'])->prefix('refugio')->group(function (
 // RUTAS DE AUTENTICACIÓN (Breeze)
 // ==========================================
 require __DIR__.'/auth.php';
+// ... (todo el código anterior de tus compañeros se queda igual)
+
+// ==========================================
+// HU-19: Rutas para el Refugio (Agregado al final)
+// ==========================================
+Route::middleware(['auth', 'role:refugio'])->prefix('refugio')->name('refugio.')->group(function () {
+    Route::get('solicitudes', [SolicitudRefugioController::class, 'index'])->name('solicitudes.index');
+    Route::get('solicitudes/{solicitud}', [SolicitudRefugioController::class, 'show'])->name('solicitudes.show');
+});
