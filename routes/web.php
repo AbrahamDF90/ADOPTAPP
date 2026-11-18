@@ -5,6 +5,7 @@ use App\Http\Controllers\Adoptante\DashboardController;
 use App\Http\Controllers\Adoptante\SolicitudController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController; // <-- NUEVO IMPORT
+use App\Http\Controllers\Refugio\AdopcionController;
 use App\Http\Controllers\Refugio\PublicacionController;
 use App\Http\Controllers\Refugio\SolicitudRefugioController;
 use Illuminate\Support\Facades\Route;
@@ -80,4 +81,6 @@ require __DIR__.'/auth.php';
 Route::middleware(['auth', 'role:refugio'])->prefix('refugio')->name('refugio.')->group(function () {
     Route::get('solicitudes', [SolicitudRefugioController::class, 'index'])->name('solicitudes.index');
     Route::get('solicitudes/{solicitud}', [SolicitudRefugioController::class, 'show'])->name('solicitudes.show');
+    // HU-22: Actualizar estado post-adopción
+    Route::patch('/adopciones/{adopcion}/estado', [AdopcionController::class, 'updateEstado'])->name('adopciones.estado');
 });
