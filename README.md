@@ -155,3 +155,19 @@ Cada vez que tomes una HU de Jira/GitHub Projects, seguí este flujo estándar p
 
 **Deuda Técnica:**
 * Las acciones para que el refugio acepte o rechace la solicitud (botones de acción) se implementarán en las HUs 20 y 21.
+
+### HU-20: Aceptar Solicitud de Adopción
+**Solución Implementada:**
+* Se añadió el método `aceptar` en `SolicitudRefugioController`, protegido por validación de pertenencia (403 si la solicitud no es del refugio).
+* Se validó que la solicitud esté en estado `pendiente` o `en_entrevista`.
+* Se usó **DB::transaction** para garantizar atomicidad: aceptar la solicitud, cambiar la publicación a `adoptada`, cerrar las demás solicitudes activas y crear el registro en `adopciones`.
+* Se agregó test Pest con `RefreshDatabase` cubriendo happy path y control de acceso.
+
+**Patrones de Diseño:**
+1. **Transaction Script:** `DB::transaction` coordina 3 tablas (`solicitudes`, `publicaciones`, `adopciones`).
+2. **Active Record:** `update()` y `create()` sobre modelos Eloquent.
+3. **MVC:** Lógica en controlador, datos en modelos, presentación en Blade.
+4. **Route Model Binding:** La solicitud se inyecta desde la URL.
+
+**Deuda Técnica:**
+* Lógica en controlador; cuando supere las 50 líneas, extraer a `AceptarSolicitudService` (Service Layer, ver `docs/ARQUITECTURA.md`).

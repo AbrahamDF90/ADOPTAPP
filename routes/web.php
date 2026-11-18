@@ -4,7 +4,7 @@ use App\Http\Controllers\Admin\RefugioController;
 use App\Http\Controllers\Adoptante\DashboardController;
 use App\Http\Controllers\Adoptante\SolicitudController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\ProfileController; // <-- NUEVO IMPORT
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Refugio\PublicacionController;
 use App\Http\Controllers\Refugio\SolicitudRefugioController;
 use Illuminate\Support\Facades\Route;
@@ -76,8 +76,13 @@ require __DIR__.'/auth.php';
 
 // ==========================================
 // HU-19: Rutas para el Refugio (Agregado al final)
+// HU-20: Aceptar solicitud (agregado)
 // ==========================================
 Route::middleware(['auth', 'role:refugio'])->prefix('refugio')->name('refugio.')->group(function () {
     Route::get('solicitudes', [SolicitudRefugioController::class, 'index'])->name('solicitudes.index');
     Route::get('solicitudes/{solicitud}', [SolicitudRefugioController::class, 'show'])->name('solicitudes.show');
+
+    // HU-20: Aceptar solicitud
+    Route::patch('solicitudes/{solicitud}/aceptar', [SolicitudRefugioController::class, 'aceptar'])
+        ->name('solicitudes.aceptar');
 });
