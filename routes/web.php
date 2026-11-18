@@ -69,6 +69,7 @@ require __DIR__.'/auth.php';
 // ==========================================
 // HU-19: Rutas para el Refugio
 // HU-20: Aceptar solicitud
+// HU-21: Revertir adopción
 // HU-22: Actualizar estado post-adopción
 // ==========================================
 Route::middleware(['auth', 'role:refugio'])->prefix('refugio')->name('refugio.')->group(function () {
@@ -78,6 +79,10 @@ Route::middleware(['auth', 'role:refugio'])->prefix('refugio')->name('refugio.')
     // HU-20: Aceptar solicitud
     Route::patch('solicitudes/{solicitud}/aceptar', [SolicitudRefugioController::class, 'aceptar'])
         ->name('solicitudes.aceptar');
+
+    // HU-21: Revertir adopción
+    Route::patch('solicitudes/{solicitud}/revertir', [SolicitudRefugioController::class, 'revertir'])
+        ->name('solicitudes.revertir');
 
     // HU-22: Actualizar estado post-adopción
     Route::patch('/adopciones/{adopcion}/estado', [AdopcionController::class, 'updateEstado'])->name('adopciones.estado');

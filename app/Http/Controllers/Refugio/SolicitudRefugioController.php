@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\DB;
  *
  * HU-19: Gestión de solicitudes para el rol Refugio.
  * HU-20: Aceptación de solicitud (transaction script).
+ * HU-21: Reversión de adopción (transaction script).
  */
 class SolicitudRefugioController extends Controller
 {
@@ -127,5 +128,64 @@ class SolicitudRefugioController extends Controller
         return redirect()
             ->route('refugio.solicitudes.index')
             ->with('success', 'Solicitud aceptada. La mascota fue marcada como adoptada.');
+    }
+
+    /**
+     * HU-21: Revierte una adopción aceptada.
+     *
+     * Flujo atómico (Transaction Script):
+     *  1. Valida que la solicitud pertenezca a una publicación del refugio autenticado.
+     *  2. Valida que exista una adopción activa para esa solicitud.
+     *  3. Dentro de una transacción:
+     *     - Marca la adopción como 'cancelada' con motivo.
+     *     - Devuelve la publicación a 'completa'.
+     *     - Devuelve la solicitud a 'pendiente'.
+     *
+     * Patrón de diseño: Transaction Script (DB::transaction) + MVC + Active Record.
+     *
+     * @param  Solicitud  $solicitud  Solicitud cuya adopción se revierte.
+     * @return RedirectResponse
+     */
+    public function revertir(Solicitud $solicitud)
+    {
+        $refugio = Auth::user()->refugio;
+
+        // Seguridad: el refugio solo puede revertir adopciones de SUS publicaciones.
+        if (! $refugio || $solicitud->publicacion->refugio_id !== $refugio->id) {
+            abort(403, 'No tienes permiso para revertir esta adopción.');
+        }
+
+        // Buscar la adopción activa asociada a esta solicitud (publicación + adoptante).
+        $adopcion = Adopcion::where('publicacion_id', $solicitud->publicacion_id)
+            ->where('adoptante_id', $solicitud->adoptante_id)
+            ->where('estado_adopcion', 'activa')
+            ->first();
+
+        // Validación: si no hay adopción activa, no se puede revertir.
+        if (! $adopcion) {
+            return redirect()
+                ->route('refugio.solicitudes.show', $solicitud)
+                ->with('error', 'No hay una adopción activa para revertir.');
+        }
+
+        // TODO: Refactorizar a RevertirAdopcionService cuando el controlador supere las 50 líneas (ver docs/ARQUITECTURA.md).
+
+        DB::transaction(function () use ($solicitud, $adopcion) {
+            // 1. Cancelar la adopción (NO se borra, solo cambia de estado).
+            $adopcion->update([
+                'estado_adopcion' => 'cancelada',
+                'motivo_cancelacion' => 'Adopción no concretada.',
+            ]);
+
+            // 2. La publicación vuelve a estar 'completa'.
+            $solicitud->publicacion->update(['estado' => 'completa']);
+
+            // 3. La solicitud vuelve a 'pendiente'.
+            $solicitud->update(['estado' => 'pendiente']);
+        });
+
+        return redirect()
+            ->route('refugio.solicitudes.index')
+            ->with('success', 'Adopción revertida. La publicación volvió a estado "completa".');
     }
 }

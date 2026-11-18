@@ -6,7 +6,7 @@
     <div class="py-8">
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
 
-            {{-- HU-20: Mensajes de éxito / error tras aceptar solicitud --}}
+            {{-- Mensajes de éxito / error tras acciones --}}
             @if(session('success'))
                 <div class="mb-4 bg-emerald-100 border border-emerald-400 text-emerald-800 px-4 py-3 rounded">
                     {{ session('success') }}
@@ -49,6 +49,21 @@
                         <button type="submit"
                                 class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-2 rounded transition">
                             Aceptar solicitud
+                        </button>
+                    </form>
+                @endif
+
+                {{-- HU-21: Acción para revertir una adopción aceptada --}}
+                @if($solicitud->estado === 'aceptada')
+                    <form action="{{ route('refugio.solicitudes.revertir', $solicitud) }}"
+                          method="POST"
+                          class="inline-block mt-4 ml-2"
+                          onsubmit="return confirm('¿Revertir la adopción? La publicación volverá a estar disponible y la solicitud quedará pendiente.');">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit"
+                                class="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded transition">
+                            Revertir adopción
                         </button>
                     </form>
                 @endif
