@@ -33,7 +33,7 @@ Este documento es la hoja de ruta del proyecto.
 *   **HU-21 ⏳ (Revertir Aceptación):** Refugio cancela adopción si no se concretó. Publicación vuelve a `completa`.
 *   **HU-22 ✅ (Estado Post-Adopción):** Refugio marca estado de mascota (fallecida, robada, etc.).
 *   **HU-23 ⏳ (Notificar Refugio):** Aviso in-app cuando hay nueva solicitud.
-*   **HU-24 ⏳ (Notificar Adoptante):** Aviso in-app cuando aceptan o rechazan su solicitud.
+*   **HU-24 ✅ (Notificar Adoptante):** Aviso in-app cuando aceptan o rechazan su solicitud.
 
 ## 🏃‍♂️ Sprint 5 y 6: Panel Admin y Cierre
 *   **HU-25 ⏳ (Purga Notificaciones):** Admin borra notificaciones de más de 90 días.

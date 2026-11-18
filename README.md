@@ -169,3 +169,17 @@ Cada vez que tomes una HU de Jira/GitHub Projects, seguí este flujo estándar p
 
 **Deuda Técnica (Trade-offs):**
 * La actualización del estado post-adopción depende de que exista un registro en la tabla `adopciones`. Como la HU-20 (Aceptar Solicitud) aún está en desarrollo por el equipo, la creación de este registro y el listado de adopciones se probaron localmente usando *Factories*. Una vez que la HU-20 se integre en `develop`, el flujo de la HU-22 quedará completo de punta a punta.
+### HU-24: Notificaciones al Adoptante
+**Solución Implementada:**
+* Se creó la clase `SolicitudStatusNotification` para manejar notificaciones in-app guardadas en la base de datos.
+* Se creó `Adoptante\NotificacionController` con métodos `index` (listar) y `markAsRead` (marcar como leída).
+* Se agregó la migración nativa de Laravel para la tabla `notifications`.
+* Vistas responsivas con Tailwind CSS para diferenciar notificaciones leídas y no leídas.
+
+**Patrones de Diseño:**
+1. **MVC:** Separación de lógica en el Controlador, la Clase de Notificación y la vista Blade.
+2. **Active Record:** Uso de relaciones polimórficas `$user->notifications()`.
+3. **Notification Pattern:** Uso de la clase Notification de Laravel para estructurar el aviso.
+
+**Deuda Técnica (Trade-offs):**
+* El envío real de la notificación depende de que las HUs 20 y 21 (Aceptar/Revertir Solicitud) invoquen la clase `SolicitudStatusNotification`. Por ahora, el flujo fue probado localmente usando Factories y llamadas directas en los tests.
