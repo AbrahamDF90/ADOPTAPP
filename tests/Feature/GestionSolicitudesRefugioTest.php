@@ -16,15 +16,13 @@ test('un refugio ve solo las solicitudes de sus publicaciones', function () {
 
     // NOTA: Forzamos la especie para evitar "Flaky Tests" en el CI/CD.
     // Si usábamos Faker, a veces ambas publicaciones eran "Perro" y el test fallaba.
-    
-    $publicacion = Publicacion::factory()->create(['refugio_id' => $refugio->id, 'especie' => 'Perro']);
 
+    $publicacion = Publicacion::factory()->create(['refugio_id' => $refugio->id, 'especie' => 'Perro']);
 
     // 2. Refugio ajeno
     $userRefugioAjeno = User::factory()->create(['role' => 'refugio']);
     $refugioAjeno = Refugio::factory()->create(['user_id' => $userRefugioAjeno->id]);
     $publicacionAjena = Publicacion::factory()->create(['refugio_id' => $refugioAjeno->id, 'especie' => 'Gato']);
-
 
     // 3. Adoptante (Nombre: Juan Perez, Alias: FirulaisLover)
     $userAdoptante = User::factory()->create(['role' => 'adoptante', 'name' => 'Juan Perez']);

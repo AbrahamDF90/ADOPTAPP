@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\RefugioController;
 use App\Http\Controllers\Adoptante\DashboardController;
+use App\Http\Controllers\Adoptante\NotificacionController;
 use App\Http\Controllers\Adoptante\SolicitudController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
@@ -30,11 +31,20 @@ Route::middleware('auth')->group(function () {
 });
 
 // ==========================================
-// RUTAS DE ADOPTANTE (HU-16 y HU-18)
+// RUTAS DE ADOPTANTE (HU-16, HU-18 y HU-24)
 // ==========================================
+// Patrón: Middleware (protege las rutas para que solo entren adoptantes)
 Route::middleware(['auth', 'role:adoptante'])->prefix('mi-perfil')->group(function () {
+
+    // HU-18: Panel de solicitudes del adoptante
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('adoptante.dashboard');
+
+    // HU-16: Procesar la solicitud
     Route::post('/publicaciones/{publicacion}/solicitar', [SolicitudController::class, 'store'])->name('solicitudes.store');
+
+    // HU-24: Notificaciones
+    Route::get('/notificaciones', [NotificacionController::class, 'index'])->name('adoptante.notificaciones.index');
+    Route::patch('/notificaciones/{id}/leer', [NotificacionController::class, 'markAsRead'])->name('adoptante.notificaciones.leer');
 });
 
 // ==========================================
