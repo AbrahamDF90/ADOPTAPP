@@ -207,3 +207,20 @@ Cada vez que tomes una HU de Jira/GitHub Projects, seguí este flujo estándar p
 
 **Deuda Técnica (Trade-offs):**
 * La actualización del estado post-adopción depende de que exista un registro en la tabla `adopciones`. Como la HU-20 (Aceptar Solicitud) aún está en desarrollo por el equipo, la creación de este registro y el listado de adopciones se probaron localmente usando *Factories*. Una vez que la HU-20 se integre en `develop`, el flujo de la HU-22 quedará completo de punta a punta.
+
+### HU-23: Notificar Refugio
+**Solución Implementada:**
+* Se creó la migración `create_notifications_table` (Laravel 11+ no la trae por defecto).
+* Se creó la notificación `NuevaSolicitudRecibida` con canal `database` y `toDatabase()`.
+* Se usó `afterCommit()` para garantizar que la cola no procese la notificación antes del commit de la transacción de creación de la solicitud.
+* Se modificó `SolicitudController@store` para que la transacción retorne la `$solicitud` y, después del commit, se envíe la notificación al `User` del refugio dueño de la publicación.
+* Se agregó test Pest con `RefreshDatabase` y `Notification::fake()` cubriendo el envío y la persistencia en la tabla `notifications`.
+
+**Patrones de Diseño:**
+1. **Notification (canal database):** Laravel nativo, persistencia en tabla `notifications` con UUID.
+2. **Active Record:** `$refugioUser->notify()` y relaciones Eloquent.
+3. **MVC:** Lógica en controlador, notificación en clase dedicada, datos en modelos.
+4. **Transaction Script:** Se mantiene el `DB::transaction` de HU-16 y se envía la notificación después del commit.
+
+**Deuda Técnica:**
+* La notificación es solo in-app (database). Si el PM pide email o push, se añadirían canales adicionales en `via()`.
