@@ -171,3 +171,17 @@ Cada vez que tomes una HU de Jira/GitHub Projects, seguí este flujo estándar p
 
 **Deuda Técnica:**
 * Lógica en controlador; cuando supere las 50 líneas, extraer a `AceptarSolicitudService` (Service Layer, ver `docs/ARQUITECTURA.md`).
+
+### HU-22: Estado Post-Adopción de la Mascota
+**Solución Implementada:**
+* Se creó `Refugio\AdopcionController` con el método `updateEstado`.
+* Se implementó un formulario con `@method('PATCH')` para actualizar el estado.
+* **Seguridad:** Se validó que solo el refugio dueño de la publicación pueda cambiar el estado de la mascota (retorna 403 si es ajeno).
+* **Validación:** Se usó `Rule::in()` para aceptar solo los estados permitidos por la base de datos (adoptada, fallecida, robada, perdida).
+
+**Patrones de Diseño:**
+1. **MVC:** Separación de la lógica en el Controlador y la vista en Blade.
+2. **Active Record:** Uso de `$adopcion->update()` para modificar el estado.
+
+**Deuda Técnica (Trade-offs):**
+* La actualización del estado post-adopción depende de que exista un registro en la tabla `adopciones`. Como la HU-20 (Aceptar Solicitud) aún está en desarrollo por el equipo, la creación de este registro y el listado de adopciones se probaron localmente usando *Factories*. Una vez que la HU-20 se integre en `develop`, el flujo de la HU-22 quedará completo de punta a punta.
