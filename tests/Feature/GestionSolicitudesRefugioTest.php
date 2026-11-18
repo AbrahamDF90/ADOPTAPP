@@ -13,12 +13,18 @@ test('un refugio ve solo las solicitudes de sus publicaciones', function () {
     // 1. Refugio dueño
     $userRefugio = User::factory()->create(['role' => 'refugio']);
     $refugio = Refugio::factory()->create(['user_id' => $userRefugio->id]);
-    $publicacion = Publicacion::factory()->create(['refugio_id' => $refugio->id]);
+
+    // NOTA: Forzamos la especie para evitar "Flaky Tests" en el CI/CD.
+    // Si usábamos Faker, a veces ambas publicaciones eran "Perro" y el test fallaba.
+    
+    $publicacion = Publicacion::factory()->create(['refugio_id' => $refugio->id, 'especie' => 'Perro']);
+
 
     // 2. Refugio ajeno
     $userRefugioAjeno = User::factory()->create(['role' => 'refugio']);
     $refugioAjeno = Refugio::factory()->create(['user_id' => $userRefugioAjeno->id]);
-    $publicacionAjena = Publicacion::factory()->create(['refugio_id' => $refugioAjeno->id]);
+    $publicacionAjena = Publicacion::factory()->create(['refugio_id' => $refugioAjeno->id, 'especie' => 'Gato']);
+
 
     // 3. Adoptante (Nombre: Juan Perez, Alias: FirulaisLover)
     $userAdoptante = User::factory()->create(['role' => 'adoptante', 'name' => 'Juan Perez']);
@@ -46,7 +52,7 @@ test('un refugio ve solo las solicitudes de sus publicaciones', function () {
     $response->assertSee('FirulaisLover');
 
     // Verificamos que NO vea la mascota del otro refugio
-    $response->assertDontSee($publicacionAjena->especie);
+    $response->assertDontSee('Gato'); // Forzamos a que busque esta palabra
 });
 
 test('un refugio no puede ver solicitudes ajenas', function () {
