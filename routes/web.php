@@ -4,7 +4,7 @@ use App\Http\Controllers\Admin\RefugioController;
 use App\Http\Controllers\Adoptante\DashboardController;
 use App\Http\Controllers\Adoptante\NotificacionController;
 use App\Http\Controllers\Adoptante\SolicitudController;
-use App\Http\Controllers\HomeController; // <-- NUEVO IMPORT
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Refugio\AdopcionController;
 use App\Http\Controllers\Refugio\PublicacionController;
@@ -14,10 +14,7 @@ use Illuminate\Support\Facades\Route;
 // ==========================================
 // RUTAS PÚBLICAS (HU-14 y HU-15)
 // ==========================================
-// Patrón: MVC (Delega al HomeController)
 Route::get('/', [HomeController::class, 'index'])->name('home');
-
-// Ruta de detalle (HU-15)
 Route::get('/publicaciones/{publicacion}', [HomeController::class, 'show'])->name('publicaciones.show');
 
 // ==========================================
@@ -34,7 +31,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // ==========================================
-// RUTAS DE ADOPTANTE (HU-16 y HU-18)
+// RUTAS DE ADOPTANTE (HU-16, HU-18 y HU-24)
 // ==========================================
 // Patrón: Middleware (protege las rutas para que solo entren adoptantes)
 Route::middleware(['auth', 'role:adoptante'])->prefix('mi-perfil')->group(function () {
@@ -78,14 +75,25 @@ Route::middleware(['auth', 'role:refugio'])->prefix('refugio')->group(function (
 // RUTAS DE AUTENTICACIÓN (Breeze)
 // ==========================================
 require __DIR__.'/auth.php';
-// ... (todo el código anterior de tus compañeros se queda igual)
 
 // ==========================================
-// HU-19: Rutas para el Refugio (Agregado al final)
+// HU-19: Rutas para el Refugio
+// HU-20: Aceptar solicitud
+// HU-21: Revertir adopción
+// HU-22: Actualizar estado post-adopción
 // ==========================================
 Route::middleware(['auth', 'role:refugio'])->prefix('refugio')->name('refugio.')->group(function () {
     Route::get('solicitudes', [SolicitudRefugioController::class, 'index'])->name('solicitudes.index');
     Route::get('solicitudes/{solicitud}', [SolicitudRefugioController::class, 'show'])->name('solicitudes.show');
+
+    // HU-20: Aceptar solicitud
+    Route::patch('solicitudes/{solicitud}/aceptar', [SolicitudRefugioController::class, 'aceptar'])
+        ->name('solicitudes.aceptar');
+
+    // HU-21: Revertir adopción
+    Route::patch('solicitudes/{solicitud}/revertir', [SolicitudRefugioController::class, 'revertir'])
+        ->name('solicitudes.revertir');
+
     // HU-22: Actualizar estado post-adopción
     Route::patch('/adopciones/{adopcion}/estado', [AdopcionController::class, 'updateEstado'])->name('adopciones.estado');
 });

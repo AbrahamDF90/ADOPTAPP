@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Adoptante;
 use App\Http\Controllers\Controller;
 use App\Models\Publicacion;
 use App\Models\Solicitud;
+use App\Notifications\NuevaSolicitudRecibida;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -18,6 +19,7 @@ class SolicitudController extends Controller
      *    y la creación de la nueva se hagan de forma atómica y sin errores de concurrencia.
      * 2. Active Record: Uso de los modelos Solicitud y Publicacion.
      * 3. Middleware: La ruta estará protegida para que solo los adoptantes logueados accedan.
+     * 4. Notification (HU-23): Se notifica in-app al refugio dueño de la publicación.
      *
      * Reglas de Negocio:
      * - No duplicar solicitudes del mismo adoptante.
@@ -52,10 +54,10 @@ class SolicitudController extends Controller
         }
 
         // 4. Transacción para guardar y actualizar estado
-        DB::transaction(function () use ($publicacion, $adoptante, $solicitudesActivas) {
+        $solicitud = DB::transaction(function () use ($publicacion, $adoptante, $solicitudesActivas) {
 
             // Creamos la solicitud
-            Solicitud::create([
+            $solicitud = Solicitud::create([
                 'publicacion_id' => $publicacion->id,
                 'adoptante_id' => $adoptante->id,
                 'estado' => 'pendiente',
@@ -65,7 +67,16 @@ class SolicitudController extends Controller
             if ($solicitudesActivas === 2) {
                 $publicacion->update(['estado' => 'completa']);
             }
+
+            return $solicitud;
         });
+
+        // HU-23: Notificar al refugio dueño de la publicación (después del commit).
+        $refugioUser = $publicacion->refugio->user;
+
+        if ($refugioUser) {
+            $refugioUser->notify(new NuevaSolicitudRecibida($solicitud));
+        }
 
         // Redirigimos al dashboard o al detalle con mensaje de éxito
         return redirect()->route('publicaciones.show', $publicacion)
