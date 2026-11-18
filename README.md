@@ -156,6 +156,28 @@ Cada vez que tomes una HU de Jira/GitHub Projects, seguí este flujo estándar p
 **Deuda Técnica:**
 * Las acciones para que el refugio acepte o rechace la solicitud (botones de acción) se implementarán en las HUs 20 y 21.
 
+### HU-21: Revertir Adopción
+**Solución Implementada:**
+* Se añadió el método `revertir` en `SolicitudRefugioController`, protegido por validación de pertenencia (403 si la solicitud no es del refugio).
+* Se validó que exista una adopción `activa` asociada a la solicitud; si no, redirige con error.
+* Se usó **DB::transaction** para garantizar atomicidad: cancelar la adopción (`estado_adopcion='cancelada'` + motivo), devolver la publicación a `completa` y la solicitud a `pendiente`.
+* Se agregó test Pest con `RefreshDatabase` cubriendo happy path, control de acceso y validación de adopción inexistente.
+
+**Patrones de Diseño:**
+1. **Transaction Script:** `DB::transaction` coordina 3 tablas (`adopciones`, `publicaciones`, `solicitudes`).
+2. **Active Record:** `update()` sobre modelos Eloquent.
+3. **MVC:** Lógica en controlador, datos en modelos, presentación en Blade.
+4. **Route Model Binding:** La solicitud se inyecta desde la URL.
+
+**Decisiones de negocio:**
+* Las solicitudes que se cerraron en HU-20 **no se reabren** al revertir; solo se reactiva la solicitud que había sido aceptada. El BACKLOG no pide reapertura.
+
+**Fix incluido (deuda de HU-20):**
+* Se completaron `AdoptanteFactory`, `RefugioFactory`, `PublicacionFactory`, `SolicitudFactory` y `AdopcionFactory` con sus claves foráneas (`user_id`, `refugio_id`, `publicacion_id`, `adoptante_id`). HU-20 no las necesitaba porque sus tests pasaban FKs explícitas, pero HU-21 usa los factories sin todas las FKs.
+
+**Deuda Técnica:**
+* Lógica en controlador; cuando supere las 50 líneas, extraer a `RevertirAdopcionService` (Service Layer, ver `docs/ARQUITECTURA.md`).
+
 ### HU-22: Estado Post-Adopción de la Mascota
 **Solución Implementada:**
 * Se creó `Refugio\AdopcionController` con el método `updateEstado`.
