@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Refugio;
 
 use App\Http\Controllers\Controller;
 use App\Models\Publicacion;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class PublicacionController extends Controller
@@ -20,9 +21,8 @@ class PublicacionController extends Controller
     /**
      * Guarda la publicación en la base de datos.
      * Patrón: Active Record (Uso de Eloquent).
-     * 
-     * @param Request $request
-     * @return \Illuminate\Http\RedirectResponse
+     *
+     * @return RedirectResponse
      */
     public function store(Request $request)
     {

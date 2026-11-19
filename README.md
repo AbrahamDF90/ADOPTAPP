@@ -128,3 +128,114 @@ Cada vez que tomes una HU de Jira/GitHub Projects, seguí este flujo estándar p
 1. **Transaction Script:** Uso de `DB::transaction` para garantizar la integridad de los datos al cambiar el estado de la publicación.
 2. **Active Record:** Uso de los modelos `Solicitud` y `Publicacion`.
 3. **MVC:** El formulario (Vista) envía los datos al Controlador, que procesa y guarda en el Modelo.
+
+### HU-18: Ver Solicitudes del Adoptante
+**Solución Implementada:**
+* Se creó el `DashboardController` para el perfil del adoptante.
+* Se implementó **Eager Loading** (`with('publicacion')`) para cargar los datos de las mascotas solicitadas sin hacer consultas N+1 a la base de datos.
+* La vista utiliza **Tailwind CSS** para las tarjetas de estado, mostrando badges de diferentes colores (amarillo para pendiente, verde para aceptada) y es 100% responsiva (flex-col en móviles, flex-row en escritorio).
+
+**Patrones de Diseño:**
+1. **MVC:** Separación de la lógica (`DashboardController`), datos (`Solicitud`) y presentación (`adoptante.dashboard`).
+2. **Active Record:** Uso de la relación `$adoptante->solicitudes()`.
+
+### HU-19: Gestión de Solicitudes por Refugio
+**Solución Implementada:**
+* Se creó el controlador `Refugio\SolicitudRefugioController` con métodos `index` y `show`.
+* Se aplicó **Eager Loading** (`with(['publicacion','adoptante.user'])`) para evitar consultas N+1 y optimizar el rendimiento.
+* **Seguridad:** Se implementó una validación en el método `show` para que el refugio solo pueda ver las solicitudes de sus propias publicaciones (retorna 403 si intenta ver una ajena).
+* Se agregó un filtro opcional por estado de la solicitud.
+* Las vistas utilizan Tailwind CSS y son responsivas.
+
+**Patrones de Diseño:**
+1. **MVC:** Separación de responsabilidades entre el controlador, los modelos y las vistas.
+2. **Active Record:** Uso de las relaciones de Eloquent (`$solicitud->adoptante->user`).
+3. **Route Model Binding:** El método `show` recibe automáticamente la `Solicitud` desde la URL.
+4. **Eager Loading:** Uso de `with()` para cargar relaciones de forma eficiente.
+
+**Deuda Técnica:**
+* Las acciones para que el refugio acepte o rechace la solicitud (botones de acción) se implementarán en las HUs 20 y 21.
+
+### HU-20: Aceptar Solicitud de Adopción
+**Solución Implementada:**
+* Se añadió el método `aceptar` en `SolicitudRefugioController`, protegido por validación de pertenencia (403 si la solicitud no es del refugio).
+* Se validó que la solicitud esté en estado `pendiente` o `en_entrevista`.
+* Se usó **DB::transaction** para garantizar atomicidad: aceptar la solicitud, cambiar la publicación a `adoptada`, cerrar las demás solicitudes activas y crear el registro en `adopciones`.
+* Se agregó test Pest con `RefreshDatabase` cubriendo happy path y control de acceso.
+
+**Patrones de Diseño:**
+1. **Transaction Script:** `DB::transaction` coordina 3 tablas (`solicitudes`, `publicaciones`, `adopciones`).
+2. **Active Record:** `update()` y `create()` sobre modelos Eloquent.
+3. **MVC:** Lógica en controlador, datos en modelos, presentación en Blade.
+4. **Route Model Binding:** La solicitud se inyecta desde la URL.
+
+**Deuda Técnica:**
+* Lógica en controlador; cuando supere las 50 líneas, extraer a `AceptarSolicitudService` (Service Layer, ver `docs/ARQUITECTURA.md`).
+
+### HU-21: Revertir Adopción
+**Solución Implementada:**
+* Se añadió el método `revertir` en `SolicitudRefugioController`, protegido por validación de pertenencia (403 si la solicitud no es del refugio).
+* Se validó que exista una adopción `activa` asociada a la solicitud; si no, redirige con error.
+* Se usó **DB::transaction** para garantizar atomicidad: cancelar la adopción (`estado_adopcion='cancelada'` + motivo), devolver la publicación a `completa` y la solicitud a `pendiente`.
+* Se agregó test Pest con `RefreshDatabase` cubriendo happy path, control de acceso y validación de adopción inexistente.
+
+**Patrones de Diseño:**
+1. **Transaction Script:** `DB::transaction` coordina 3 tablas (`adopciones`, `publicaciones`, `solicitudes`).
+2. **Active Record:** `update()` sobre modelos Eloquent.
+3. **MVC:** Lógica en controlador, datos en modelos, presentación en Blade.
+4. **Route Model Binding:** La solicitud se inyecta desde la URL.
+
+**Decisiones de negocio:**
+* Las solicitudes que se cerraron en HU-20 **no se reabren** al revertir; solo se reactiva la solicitud que había sido aceptada. El BACKLOG no pide reapertura.
+
+**Fix incluido (deuda de HU-20):**
+* Se completaron `AdoptanteFactory`, `RefugioFactory`, `PublicacionFactory`, `SolicitudFactory` y `AdopcionFactory` con sus claves foráneas (`user_id`, `refugio_id`, `publicacion_id`, `adoptante_id`). HU-20 no las necesitaba porque sus tests pasaban FKs explícitas, pero HU-21 usa los factories sin todas las FKs.
+
+**Deuda Técnica:**
+* Lógica en controlador; cuando supere las 50 líneas, extraer a `RevertirAdopcionService` (Service Layer, ver `docs/ARQUITECTURA.md`).
+
+### HU-22: Estado Post-Adopción de la Mascota
+**Solución Implementada:**
+* Se creó `Refugio\AdopcionController` con el método `updateEstado`.
+* Se implementó un formulario con `@method('PATCH')` para actualizar el estado.
+* **Seguridad:** Se validó que solo el refugio dueño de la publicación pueda cambiar el estado de la mascota (retorna 403 si es ajeno).
+* **Validación:** Se usó `Rule::in()` para aceptar solo los estados permitidos por la base de datos (adoptada, fallecida, robada, perdida).
+
+**Patrones de Diseño:**
+1. **MVC:** Separación de la lógica en el Controlador y la vista en Blade.
+2. **Active Record:** Uso de `$adopcion->update()` para modificar el estado.
+
+**Deuda Técnica (Trade-offs):**
+* La actualización del estado post-adopción depende de que exista un registro en la tabla `adopciones`. Como la HU-20 (Aceptar Solicitud) aún está en desarrollo por el equipo, la creación de este registro y el listado de adopciones se probaron localmente usando *Factories*. Una vez que la HU-20 se integre en `develop`, el flujo de la HU-22 quedará completo de punta a punta.
+
+### HU-23: Notificar Refugio
+**Solución Implementada:**
+* Se creó la migración `create_notifications_table` (Laravel 11+ no la trae por defecto).
+* Se creó la notificación `NuevaSolicitudRecibida` con canal `database` y `toDatabase()`.
+* Se usó `afterCommit()` para garantizar que la cola no procese la notificación antes del commit de la transacción de creación de la solicitud.
+* Se modificó `SolicitudController@store` para que la transacción retorne la `$solicitud` y, después del commit, se envíe la notificación al `User` del refugio dueño de la publicación.
+* Se agregó test Pest con `RefreshDatabase` y `Notification::fake()` cubriendo el envío y la persistencia en la tabla `notifications`.
+
+**Patrones de Diseño:**
+1. **Notification (canal database):** Laravel nativo, persistencia en tabla `notifications` con UUID.
+2. **Active Record:** `$refugioUser->notify()` y relaciones Eloquent.
+3. **MVC:** Lógica en controlador, notificación en clase dedicada, datos en modelos.
+4. **Transaction Script:** Se mantiene el `DB::transaction` de HU-16 y se envía la notificación después del commit.
+
+**Deuda Técnica:**
+* La notificación es solo in-app (database). Si el PM pide email o push, se añadirían canales adicionales en `via()`.
+
+### HU-24: Notificaciones al Adoptante
+**Solución Implementada:**
+* Se creó la clase `SolicitudStatusNotification` para manejar notificaciones in-app guardadas en la base de datos.
+* Se creó `Adoptante\NotificacionController` con métodos `index` (listar) y `markAsRead` (marcar como leída).
+* Se agregó la migración nativa de Laravel para la tabla `notifications`.
+* Vistas responsivas con Tailwind CSS para diferenciar notificaciones leídas y no leídas.
+
+**Patrones de Diseño:**
+1. **MVC:** Separación de lógica en el Controlador, la Clase de Notificación y la vista Blade.
+2. **Active Record:** Uso de relaciones polimórficas `$user->notifications()`.
+3. **Notification Pattern:** Uso de la clase Notification de Laravel para estructurar el aviso.
+
+**Deuda Técnica (Trade-offs):**
+* El envío real de la notificación depende de que las HUs 20 y 21 (Aceptar/Revertir Solicitud) invoquen la clase `SolicitudStatusNotification`. Por ahora, el flujo fue probado localmente usando Factories y llamadas directas en los tests.

@@ -28,12 +28,12 @@ Este documento es la hoja de ruta del proyecto.
 *   **HU-18 ✅ (Ver Solicitudes Adoptante):** Adoptante ve su lista de solicitudes y su estado.
 
 ## 🏃‍♂️ Sprint 4: Flujo de Adopción y Notificaciones
-*   **HU-19 ⏳ (Gestionar Solicitudes Refugio):** Refugio ve las solicitudes de sus publicaciones. Ve ficha completa del adoptante.
-*   **HU-20 ⏳ (Aceptar Solicitud):** Refugio acepta. Publicación pasa a `adoptada`. Otras 2 se cierran. Crea registro en tabla `adopciones`.
-*   **HU-21 ⏳ (Revertir Aceptación):** Refugio cancela adopción si no se concretó. Publicación vuelve a `completa`.
-*   **HU-22 ⏳ (Estado Post-Adopción):** Refugio marca estado de mascota (fallecida, robada, etc.).
-*   **HU-23 ⏳ (Notificar Refugio):** Aviso in-app cuando hay nueva solicitud.
-*   **HU-24 ⏳ (Notificar Adoptante):** Aviso in-app cuando aceptan o rechazan su solicitud.
+*   **HU-19 ✅ (Gestionar Solicitudes Refugio):** Refugio ve las solicitudes de sus publicaciones. Ve ficha completa del adoptante.
+*   **HU-20 ✅ (Aceptar Solicitud):** Refugio acepta. Publicación pasa a `adoptada`. Otras 2 se cierran. Crea registro en tabla `adopciones`.
+*   **HU-21 ✅ (Revertir Aceptación):** Refugio cancela adopción si no se concretó. Publicación vuelve a `completa`.
+*   **HU-22 ✅ (Estado Post-Adopción):** Refugio marca estado de mascota (fallecida, robada, etc.).
+*   **HU-23 ✅ (Notificar Refugio):** Aviso in-app cuando hay nueva solicitud.
+*   **HU-24 ✅ (Notificar Adoptante):** Aviso in-app cuando aceptan o rechazan su solicitud.
 
 ## 🏃‍♂️ Sprint 5 y 6: Panel Admin y Cierre
 *   **HU-25 ⏳ (Purga Notificaciones):** Admin borra notificaciones de más de 90 días.
@@ -42,3 +42,6 @@ Este documento es la hoja de ruta del proyecto.
 *   **HU-28 ⏳ (Estadísticas):** Dashboards con métricas para Admin y Refugio.
 *   **HU-29 ⏳ (Documentación Final):** Manual de usuario, UML, Gantt, etc.
 *   **HU-30 ⏳ (Deploy Final):** Puesta en producción y pruebas finales.
+
+## 🏃‍♂️ Bug fix
+*   **HU-31 ✅ (CI/CD):** Se configuró CI/CD con GitHub Actions. El pipeline bloquea PRs si los tests fallan o si no se usa RefreshDatabase en tests que consultan la BD.
