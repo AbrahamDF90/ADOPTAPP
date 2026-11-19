@@ -239,21 +239,3 @@ Cada vez que tomes una HU de Jira/GitHub Projects, seguí este flujo estándar p
 
 **Deuda Técnica (Trade-offs):**
 * El envío real de la notificación depende de que las HUs 20 y 21 (Aceptar/Revertir Solicitud) invoquen la clase `SolicitudStatusNotification`. Por ahora, el flujo fue probado localmente usando Factories y llamadas directas en los tests.
-
-### HU-25: Purga de Notificaciones
-**Solución Implementada:**
-* Se creó el modelo `Notification` con el trait `MassPrunable`.
-* Se definió `prunable()` para eliminar notificaciones con más de 90 días de antigüedad.
-* Se programó la tarea diaria `model:prune` en `routes/console.php` con `onOneServer()` y `withoutOverlapping()` (Laravel 13).
-* Se agregó test Pest con `RefreshDatabase` verificando que solo se eliminan las notificaciones antiguas.
-
-**Patrones de Diseño:**
-1. **MassPrunable:** Trait nativo de Laravel para purga masiva eficiente.
-2. **Active Record:** Uso de `Notification::where()` para definir la condición de poda.
-3. **Task Scheduling:** Programación de tareas con `Schedule::command()` en `routes/console.php`.
-
-**Decisiones de seguridad:**
-* El `id` (UUID) de `notifications` **no está en `$fillable`** para evitar asignación masiva. En tests se usa `forceCreate()`.
-
-**Deuda Técnica:**
-* La purga es automática (diaria). Si el PM requiere un botón manual en el panel admin, se añadiría un controlador y una ruta adicionales.

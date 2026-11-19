@@ -36,7 +36,7 @@ Este documento es la hoja de ruta del proyecto.
 *   **HU-24 ✅ (Notificar Adoptante):** Aviso in-app cuando aceptan o rechazan su solicitud.
 
 ## 🏃‍♂️ Sprint 5 y 6: Panel Admin y Cierre
-*   **HU-25 ✅ (Purga Notificaciones):** Admin borra notificaciones de más de 90 días.
+*   **HU-25 ⏳ (Purga Notificaciones):** Admin borra notificaciones de más de 90 días.
 *   **HU-26 ⏳ (Ver Usuarios Admin):** Admin ve listado de adoptantes y refugios.
 *   **HU-27 ⏳ (Ver Publicaciones Admin):** Admin supervisa publicaciones y puede restaurar dadas de baja.
 *   **HU-28 ⏳ (Estadísticas):** Dashboards con métricas para Admin y Refugio.
