@@ -239,3 +239,9 @@ Cada vez que tomes una HU de Jira/GitHub Projects, seguí este flujo estándar p
 
 **Deuda Técnica (Trade-offs):**
 * El envío real de la notificación depende de que las HUs 20 y 21 (Aceptar/Revertir Solicitud) invoquen la clase `SolicitudStatusNotification`. Por ahora, el flujo fue probado localmente usando Factories y llamadas directas en los tests.
+
+### HU-31: Integración Continua (CI/CD)
+**Solución Implementada:**
+* Se configuró un pipeline de **GitHub Actions** (`.github/workflows/ci.yml`).
+* **Quality Gate:** Cada vez que se crea un Pull Request hacia `develop` o `main`, GitHub levanta un entorno Ubuntu 24.04 con PHP 8.4, instala dependencias, compila Vite y ejecuta los tests de Pest.
+* **Bloqueo automático:** Si un test falla (por ejemplo, por no usar `RefreshDatabase` y no encontrar las tablas), el PR se marca en rojo y **no puede ser mergeado**, garantizando que código roto nunca llegue a producción.

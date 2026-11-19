@@ -44,4 +44,4 @@ Este documento es la hoja de ruta del proyecto.
 *   **HU-30 ⏳ (Deploy Final):** Puesta en producción y pruebas finales.
 
 ## 🏃‍♂️ Bug fix
-*   **HU-31 ✅ (CI/CD):** Se configuró CI/CD con GitHub Actions. El pipeline bloquea PRs si los tests fallan o si no se usa RefreshDatabase en tests que consultan la BD.
+*   **HU-31 ✅ (CI/CD - Calidad):** Configurado pipeline con GitHub Actions. El CI corre automáticamente en cada PR, bloqueando la fusión si algún test de Pest falla o si los tests que consultan la BD no usan el trait `RefreshDatabase`.
