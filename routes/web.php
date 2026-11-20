@@ -49,7 +49,7 @@ Route::middleware(['auth', 'role:adoptante'])->prefix('mi-perfil')->group(functi
 });
 
 // ==========================================
-// RUTAS DE ADMINISTRADOR (HU-9 y HU-26)
+// RUTAS DE ADMINISTRADOR (HU-9  HU-26  HU-27)
 // ==========================================
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', function () {
@@ -63,6 +63,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     // HU-26: Listado de usuarios (solo lectura)
     Route::get('/adoptantes', [UsuarioController::class, 'adoptantes'])->name('admin.adoptantes.index');
     Route::get('/refugios', [UsuarioController::class, 'refugios'])->name('admin.refugios.index');
+
+    // HU-27: Ver publicaciones de refugios (por el admin)
+    Route::get('/publicaciones', [PublicacionController::class, 'index'])->name('admin.publicaciones.index');
+    Route::delete('/publicaciones/{publicacion}', [PublicacionController::class, 'destroy'])->name('admin.publicaciones.destroy');
+    Route::post('/publicaciones/{id}/restaurar', [PublicacionController::class, 'restore'])->name('admin.publicaciones.restore');
 });
 
 // ==========================================
