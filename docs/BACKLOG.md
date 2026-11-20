@@ -39,7 +39,7 @@ Este documento es la hoja de ruta del proyecto.
 *   **HU-25 ✅ (Purga Notificaciones):** Admin borra notificaciones de más de 90 días.
 *   **HU-26 ✅ (Ver Usuarios Admin):** Admin ve listado de adoptantes y refugios.
 *   **HU-27 ✅ (Ver Publicaciones Admin):** Admin supervisa publicaciones activas y dadas de baja. Puede restaurarlas usando SoftDeletes.
-*   **HU-28 ⏳ (Estadísticas):** Dashboards con métricas para Admin y Refugio.
+*   **HU-28 ✅ (Estadísticas):** Dashboards con métricas para Admin y Refugio.
 *   **HU-29 ⏳ (Documentación Final):** Manual de usuario, UML, Gantt, etc.
 *   **HU-30 ⏳ (Deploy Final):** Puesta en producción y pruebas finales.
 

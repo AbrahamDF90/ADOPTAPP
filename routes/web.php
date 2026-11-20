@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController; // HU-28
+use App\Http\Controllers\Admin\PublicacionController as AdminPublicacionController; // HU-27 (alias)
 use App\Http\Controllers\Admin\RefugioController;
 use App\Http\Controllers\Admin\UsuarioController; // HU-26
 use App\Http\Controllers\Adoptante\DashboardController;
@@ -8,6 +10,7 @@ use App\Http\Controllers\Adoptante\SolicitudController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Refugio\AdopcionController;
+use App\Http\Controllers\Refugio\DashboardController as RefugioDashboardController; // HU-28
 use App\Http\Controllers\Refugio\PublicacionController;
 use App\Http\Controllers\Refugio\SolicitudRefugioController;
 use Illuminate\Support\Facades\Route;
@@ -49,12 +52,11 @@ Route::middleware(['auth', 'role:adoptante'])->prefix('mi-perfil')->group(functi
 });
 
 // ==========================================
-// RUTAS DE ADMINISTRADOR (HU-9  HU-26  HU-27)
+// RUTAS DE ADMINISTRADOR (HU-9  HU-26  HU-27  HU-28)
 // ==========================================
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('admin.dashboard');
+    // HU-28: Dashboard con métricas globales (antes closure, ahora controlador)
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
     // HU-09: Alta de refugios
     Route::get('/refugios/crear', [RefugioController::class, 'create'])->name('admin.refugios.create');
@@ -64,19 +66,18 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/adoptantes', [UsuarioController::class, 'adoptantes'])->name('admin.adoptantes.index');
     Route::get('/refugios', [UsuarioController::class, 'refugios'])->name('admin.refugios.index');
 
-    // HU-27: Ver publicaciones de refugios (por el admin)
-    Route::get('/publicaciones', [PublicacionController::class, 'index'])->name('admin.publicaciones.index');
-    Route::delete('/publicaciones/{publicacion}', [PublicacionController::class, 'destroy'])->name('admin.publicaciones.destroy');
-    Route::post('/publicaciones/{id}/restaurar', [PublicacionController::class, 'restore'])->name('admin.publicaciones.restore');
+    // HU-27: Ver publicaciones de refugios (por el admin) — usa el alias AdminPublicacionController
+    Route::get('/publicaciones', [AdminPublicacionController::class, 'index'])->name('admin.publicaciones.index');
+    Route::delete('/publicaciones/{publicacion}', [AdminPublicacionController::class, 'destroy'])->name('admin.publicaciones.destroy');
+    Route::post('/publicaciones/{id}/restaurar', [AdminPublicacionController::class, 'restore'])->name('admin.publicaciones.restore');
 });
 
 // ==========================================
-// RUTAS DE REFUGIO (HU-11)
+// RUTAS DE REFUGIO (HU-11  HU-28)
 // ==========================================
 Route::middleware(['auth', 'role:refugio'])->prefix('refugio')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('refugio.dashboard');
-    })->name('refugio.dashboard');
+    // HU-28: Dashboard con métricas del refugio (antes closure, ahora controlador)
+    Route::get('/dashboard', [RefugioDashboardController::class, 'index'])->name('refugio.dashboard');
 
     Route::get('/publicaciones/crear', [PublicacionController::class, 'create'])->name('refugio.publicaciones.create');
     Route::post('/publicaciones', [PublicacionController::class, 'store'])->name('refugio.publicaciones.store');
