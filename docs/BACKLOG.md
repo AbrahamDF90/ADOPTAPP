@@ -36,12 +36,14 @@ Este documento es la hoja de ruta del proyecto.
 *   **HU-24 ✅ (Notificar Adoptante):** Aviso in-app cuando aceptan o rechazan su solicitud.
 
 ## 🏃‍♂️ Sprint 5 y 6: Panel Admin y Cierre
-*   **HU-25 ⏳ (Purga Notificaciones):** Admin borra notificaciones de más de 90 días.
-*   **HU-26 ⏳ (Ver Usuarios Admin):** Admin ve listado de adoptantes y refugios.
-*   **HU-27 ⏳ (Ver Publicaciones Admin):** Admin supervisa publicaciones y puede restaurar dadas de baja.
+*   **HU-25 ✅ (Purga Notificaciones):** Admin borra notificaciones de más de 90 días.
+*   **HU-26 ✅ (Ver Usuarios Admin):** Admin ve listado de adoptantes y refugios.
+*   **HU-27 ✅ (Ver Publicaciones Admin):** Admin supervisa publicaciones activas y dadas de baja. Puede restaurarlas usando SoftDeletes.
 *   **HU-28 ⏳ (Estadísticas):** Dashboards con métricas para Admin y Refugio.
 *   **HU-29 ⏳ (Documentación Final):** Manual de usuario, UML, Gantt, etc.
 *   **HU-30 ⏳ (Deploy Final):** Puesta en producción y pruebas finales.
 
 ## 🏃‍♂️ Bug fix
 *   **HU-31 ✅ (CI/CD - Calidad):** Configurado pipeline con GitHub Actions. El CI corre automáticamente en cada PR, bloqueando la fusión si algún test de Pest falla o si los tests que consultan la BD no usan el trait `RefreshDatabase`.
+*   **HU-32 ✅ (PR Review):** Agregadas nuevas historias de usuario (3) en el PR y revisión de código sugerida.
+*   **HU-33 ✅ (Refactoring - Mocks):** Implementación de Mocks en los test de controller para evitar el uso de factories.
