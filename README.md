@@ -257,3 +257,19 @@ Cada vez que tomes una HU de Jira/GitHub Projects, seguí este flujo estándar p
 
 **Deuda Técnica:**
 * La purga es automática (diaria). Si el PM requiere un botón manual en el panel admin, se añadiría un controlador y una ruta adicionales.
+
+### HU-26: Listado de Usuarios (Admin)
+**Solución Implementada:**
+* Se creó `Admin\UsuarioController` (solo lectura) con métodos `adoptantes()` y `refugios()`, sin modificar `Admin\RefugioController` (HU-09).
+* **Eager Loading** (`with('user')`) para evitar el problema N+1.
+* **Paginación nativa** de 15 ítems por página.
+* Vistas Blade responsivas (`overflow-x-auto`) con la paleta oficial (thead negro, acentos emerald).
+
+**Patrones de Diseño:**
+1. **MVC:** Controlador (`Admin\UsuarioController`), modelos (`Adoptante`, `Refugio`) y vistas (`admin.usuarios.*`).
+2. **Active Record + Eager Loading:** `Adoptante::with('user')->paginate()`.
+3. **Middleware:** Rutas protegidas con `role:admin` dentro del grupo `auth` existente.
+
+**Deuda Técnica:**
+* Si se agregan filtros/búsqueda/exportación, extraer a `Admin\UsuarioService` (Service Layer).
+* Botones de editar/bloquear refugio quedan para HU-10 (no se implementaron para no adelantar alcance).

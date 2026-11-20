@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\RefugioController;
+use App\Http\Controllers\Admin\UsuarioController; // HU-26
 use App\Http\Controllers\Adoptante\DashboardController;
 use App\Http\Controllers\Adoptante\NotificacionController;
 use App\Http\Controllers\Adoptante\SolicitudController;
@@ -48,15 +49,20 @@ Route::middleware(['auth', 'role:adoptante'])->prefix('mi-perfil')->group(functi
 });
 
 // ==========================================
-// RUTAS DE ADMINISTRADOR (HU-9)
+// RUTAS DE ADMINISTRADOR (HU-9 y HU-26)
 // ==========================================
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', function () {
         return view('admin.dashboard');
     })->name('admin.dashboard');
 
+    // HU-09: Alta de refugios
     Route::get('/refugios/crear', [RefugioController::class, 'create'])->name('admin.refugios.create');
     Route::post('/refugios', [RefugioController::class, 'store'])->name('admin.refugios.store');
+
+    // HU-26: Listado de usuarios (solo lectura)
+    Route::get('/adoptantes', [UsuarioController::class, 'adoptantes'])->name('admin.adoptantes.index');
+    Route::get('/refugios', [UsuarioController::class, 'refugios'])->name('admin.refugios.index');
 });
 
 // ==========================================
