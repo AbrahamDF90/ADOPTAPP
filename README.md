@@ -15,19 +15,116 @@ El sistema sigue una arquitectura **Monolito MVC** (Modelo-Vista-Controlador). S
 *   **Middleware (Cadena de Responsabilidad):** Uso de `RoleMiddleware` para interceptar peticiones HTTP y validar que el usuario tenga el rol adecuado (admin, refugio, adoptante) antes de acceder a rutas protegidas.
 *   **Dependency Injection:** Uso nativo de Laravel para inyectar dependencias como `Request` o servicios en los controladores, facilitando el testing.
 
-## 📋 Soluciones Implementadas (Sprint 1)
+## 📋 Soluciones Implementadas (Historias de Usuario)
 
-### HU-01: Infraestructura
+### Sprint 1: Fundaciones y Autenticación
+
+**HU-01: Infraestructura**
 Se configuró una máquina virtual con Debian 13, Nginx como servidor web, PHP 8.4 y MariaDB. Se implementó un firewall (UFW) restringiendo el acceso a puertos específicos.
 
-### HU-02 y HU-03: Base de Datos y Control de Versiones
+**HU-02 y HU-03: Base de Datos y Control de Versiones**
 Se diseñó un modelo relacional normalizado. Las tablas principales (`users`, `adoptantes`, `refugios`, `publicaciones`, `solicitudes`, `adopciones`) se crearon mediante **Migraciones** de Laravel para garantizar la portabilidad del esquema. Se utilizó Git con la estrategia de ramas `GitFlow` (`main`, `develop`, `dev/feature`).
 
-### HU-04, HU-05 y HU-06: Autenticación y Roles
+**HU-04, HU-05 y HU-06: Autenticación y Roles**
 *   Se instaló **Laravel Breeze** para el scaffolding de autenticación.
-*   Se extendió el registro por defecto: mediante una **Transacción de Base de Datos (`DB::transaction`)**, al registrarse un usuario, se crean sus credenciales en `users` y su perfil (DNI, foto, dirección) en `adoptantes` de forma atómica (si falla uno, no se guarda el otro).
+*   Se extendió el registro por defecto: mediante una **Transacción de Base de Datos (`DB::transaction`)**, al registrarse un usuario, se crean sus credenciales en `users` y su perfil (DNI, foto, dirección) en `adoptantes` de forma atómica.
 *   Se implementó un **Middleware de roles** para proteger las rutas según el perfil.
-*   Se configuró el SMTP de Brevo (en `.env`) para el envío de correos de verificación y reseteo de contraseña.
+*   Se configuró el SMTP de Brevo (en `.env`) para el envío de correos.
+
+### Sprint 2: Gestión de Refugios y Publicaciones
+
+**HU-07: Edición de Perfil del Adoptante**
+*   Se creó el controlador `Adoptante\PerfilController` (con métodos `edit` y `update`), respetando el principio de **Responsabilidad Única (SRP)**.
+*   **Seguridad:** La regla de negocio impide modificar el DNI; el controlador solo actualiza alias, dirección, teléfono y foto.
+*   **Manejo de Archivos:** Uso de `Storage::disk('public')` para guardar y reemplazar la foto de perfil en el servidor, en lugar de la base de datos.
+*   **Deuda Técnica:** Si en el futuro se requiere cambiar la contraseña o email desde la misma vista, se deberá extender el `ProfileController` de Breeze o crear un Form Request específico.
+
+**Patrones de Diseño Usados:**
+1. **MVC:** Controlador (`PerfilController`), Modelo (`Adoptante`) y Vista (`edit.blade.php`).
+2. **Active Record:** Uso de `$adoptante->save()` para persistir los cambios.
+3. **Storage Pattern:** Abstracción del almacenamiento de archivos provista por Laravel.
+
+**HU-09: Creación de Refugios por el Administrador**
+*   **MVC (Model-View-Controller):** Se separó la lógica en un Controlador (`RefugioController`), dos Modelos (`User` y `Refugio`) y una Vista (`create.blade.php`).
+*   **Transaction Script:** Se utilizó `DB::transaction()` en el método `store`. Este patrón garantiza que la creación del Usuario y del Refugio se ejecuten como una unidad atómica.
+*   **Deuda Técnica:** Toda la lógica de negocio está en el Controlador (*Fat Controller*). Solución futura: implementar Patrón Service o Action.
+
+**HU-11: Crear Publicación (Refugio)**
+*   El refugio puede subir una foto y datos de la mascota.
+*   **Storage Pattern:** Uso de `store('publicaciones', 'public')` para guardar la imagen en el disco.
+
+**HU-14: Galería Pública de Mascotas**
+*   Se creó el `HomeController` para manejar la página de inicio.
+*   **Eager Loading:** `with('refugio')` para optimizar el rendimiento (evita el problema N+1).
+*   **Paginación Nativa:** 12 ítems por página.
+*   La vista se maquetó con **Tailwind CSS** usando CSS Grid (`grid-cols-1 md:grid-cols-4`).
+
+**HU-15: Detalle de Publicación**
+*   **Route Model Binding:** Captura la publicación directamente desde la URL.
+*   Se aplicó una validación de seguridad en el controlador: si la publicación no está `activa`, devuelve un error 404.
+*   Vista responsiva de dos columnas.
+
+### Sprint 3: Solicitudes de Adopción
+
+**HU-16: Creación de Solicitud de Adopción**
+*   **Validaciones estrictas:** El adoptante no puede duplicar solicitudes, y una publicación no puede superar las 3 solicitudes activas.
+*   **Transaction Script:** `DB::transaction` para guardar la solicitud y, si es la tercera, actualizar el estado a `completa` de forma segura.
+
+**HU-18: Ver Solicitudes del Adoptante**
+*   Se creó el `DashboardController` para el perfil del adoptante.
+*   **Eager Loading:** `with('publicacion')` para cargar los datos de las mascotas solicitadas sin consultas N+1.
+*   La vista utiliza **Tailwind CSS** para las tarjetas de estado.
+
+### Sprint 4: Flujo de Adopción y Notificaciones
+
+**HU-19: Gestión de Solicitudes por Refugio**
+*   Controlador `Refugio\SolicitudRefugioController` (`index` y `show`).
+*   **Seguridad:** El refugio solo puede ver las solicitudes de sus propias publicaciones (403 si intenta ver una ajena).
+*   **Eager Loading:** `with(['publicacion','adoptante.user'])` para evitar consultas N+1.
+
+**HU-20: Aceptar Solicitud de Adopción**
+*   Validación de pertenencia y estados (`pendiente` o `en_entrevista`).
+*   **Transaction Script:** `DB::transaction` para aceptar la solicitud, cambiar la publicación a `adoptada`, cerrar las demás y crear el registro en `adopciones`.
+
+**HU-21: Revertir Adopción**
+*   Validación de existencia de adopción `activa`.
+*   **Transaction Script:** Cancela la adopción (`estado_adopcion='cancelada'`), devuelve la publicación a `completa` y la solicitud a `pendiente`.
+
+**HU-22: Estado Post-Adopción de la Mascota**
+*   Controlador `Refugio\AdopcionController@updateEstado`.
+*   **Seguridad:** Solo el refugio dueño de la publicación puede cambiar el estado (403 si es ajeno).
+*   **Validación:** `Rule::in()` para aceptar solo los estados permitidos.
+
+**HU-23 y HU-24: Notificaciones In-app**
+*   Clases `NuevaSolicitudRecibida` y `SolicitudStatusNotification`.
+*   Canales `database` de Laravel implementados para persistencia en tabla `notifications`.
+*   Vistas responsivas con Tailwind CSS.
+
+### Sprint 5: Panel Admin y Calidad
+
+**HU-25: Purga de Notificaciones**
+*   Trait `MassPrunable` en el modelo `Notification`.
+*   Programación de tarea diaria `model:prune` en `routes/console.php` (Laravel 13).
+
+**HU-26: Listado de Usuarios (Admin)**
+*   `Admin\UsuarioController` (solo lectura).
+*   Eager Loading (`with('user')`) y paginación de 15 ítems.
+
+**HU-27: Gestión de Publicaciones (Admin)**
+*   `Admin\PublicacionController`.
+*   **SoftDeletes:** Uso de `withTrashed()` para ver publicaciones dadas de baja y `restore()` para recuperarlas.
+*   Vista con tabla, badges de estado y formularios de acción.
+
+**HU-28: Dashboards de Estadísticas (Admin y Refugio)**
+*   **Service Layer:** Creación de `EstadisticaService` (SRP) para centralizar las consultas de conteo.
+*   **Dependency Injection:** Inyección del servicio en los controladores `Admin\DashboardController` y `Refugio\DashboardController`.
+*   Vistas responsivas con tarjetas de métricas (Tailwind Grid).
+
+**HU-31: Integración Continua (CI/CD)**
+*   Pipeline con **GitHub Actions** (`.github/workflows/ci.yml`).
+*   **Quality Gate:** Cada PR corre los tests de Pest en Ubuntu 24.04. Si los tests fallan o no se usa `RefreshDatabase`, el PR se bloquea.
+
+---
 
 ## 🚀 Instalación en Local
 1. Clonar el repositorio: `git clone ...`
@@ -43,282 +140,34 @@ El proyecto utiliza **Pest PHP** para garantizar la calidad del código y valida
 
 ### ¿Cómo ejecutar los tests?
 Para correr **toda** la suite de pruebas (recomendado antes de hacer un commit o PR):
-
+```bash
 php artisan test
+```
 
-### test especificos
-
+### Tests específicos
+```bash
 php artisan test --filter=NombreDelTest
-
 php artisan test --filter=RegistroAdoptanteTest
+```
 
+### Cobertura de código
+```bash
 sudo apt install php8.4-pcov
 php artisan test --coverage
+```
 
 ## 🎨 Paleta de Colores Oficial (Branding ADOPTAPP)
 El diseño visual del sistema se basa en el logotipo oficial, utilizando una interfaz con modo oscuro (Dark Mode) para resaltar los colores de la marca.
 
-|Color            |    Código HEX   |   Clase Tailwind   | Uso principal                                                   |
-|   Negro         | #000000       | bg-black           | Fondo de la barra de navegación y layouts.                      |
-|   Verde Menta   | #6ee7b7       | text-emerald-400   | Color principal de la marca, botones de acción (CTA) y enlaces. |
-|   Rojo Coral    | #ef4444       | text-red-500       | Alertas, errores y acentos visuales del perro.                  |
-|   Celeste       | #38bdf8       | text-sky-400       | Acentos visuales secundarios.                                   |
-|   Amarillo      | #fbbf24       | text-amber-400     | Detalles y estados de advertencia.                              |
+| Color | Código HEX | Clase Tailwind | Uso principal |
+| :--- | :--- | :--- | :--- |
+| Negro | #000000 | `bg-black` | Fondo de la barra de navegación y layouts. |
+| Verde Menta | #6ee7b7 | `text-emerald-400` | Color principal de la marca, botones de acción (CTA) y enlaces. |
+| Rojo Coral | #ef4444 | `text-red-500` | Alertas, errores y acentos visuales del perro. |
+| Celeste | #38bdf8 | `text-sky-400` | Acentos visuales secundarios. |
+| Amarillo | #fbbf24 | `text-amber-400` | Detalles y estados de advertencia. |
 
-
-## 🏗️ HU-09: Creación de Refugios por el Administrador
-
-### Patrones de Diseño Aplicados
-1. **MVC (Model-View-Controller):** Se separó la lógica en un Controlador (`RefugioController`), dos Modelos (`User` y `Refugio`) y una Vista (`create.blade.php`).
-2. **Transaction Script:** Se utilizó `DB::transaction()` en el método `store`. Este patrón garantiza que la creación del Usuario y del Refugio se ejecuten como una unidad atómica. Si algo falla, se hace un *rollback* automático, evitando datos huérfanos.
-3. **Active Record:** Los modelos `User` y `Refugio` abstraen las consultas SQL, permitiendo crear registros usando métodos orientados a objetos (`User::create()`).
-
-### Análisis de Deuda Técnica (Trade-offs)
-* **Deuda Asumida:** Toda la lógica de negocio (validación y creación) está en el Controlador (conocido como *Fat Controller*).
-* **Justificación:** Para un flujo CRUD simple, mantenerlo en el controlador es rápido y legible.
-* **Solución Futura (Escalabilidad):** Si el alta de un refugio requiere más pasos (ej. enviar correo de bienvenida, generar un slug único, asignar plan), se deberá refactorizar aplicando el **Patrón Service** (capa de servicios) o **Action Pattern**, moviendo la lógica a una clase dedicada (ej. `CreateRefugioAction`). Esto respetará el Principio de Responsabilidad Única (SRP) de SOLID.
-
-## 🤝 Guía para Nuevos Desarrolladores (Onboarding)
-
-¡Bienvenido al equipo de ADOPTAPP! Para empezar a codificar, es **obligatorio** leer los siguientes documentos en la carpeta `/docs`:
-1. `docs/ARQUITECTURA.md`: Entender el stack, los patrones de diseño y las reglas de escalabilidad (SOLID).
-2. `docs/REGLAS_CODIGO.md`: Normas de comentarios y documentación.
-
-### 🛠️ Flujo de trabajo por Historia de Usuario (HU)
-Cada vez que tomes una HU de Jira/GitHub Projects, seguí este flujo estándar para no romper el sistema:
-1. **Crear Rama:** `git checkout -b dev/nombre-tarea` desde `develop`.
-2. **Backend (Lógica):** Crear el Controlador en `app/Http/Controllers/` y la lógica de base de datos.
-3. **Frontend (Vistas):** Crear el archivo Blade en `resources/views/rol/entidad/` (ej: `admin/refugios/create.blade.php`).
-4. **Rutas:** Registrar la ruta en `routes/web.php` (protegida por el Middleware correspondiente).
-5. **Documentar:** Comentar el código explicando el patrón de diseño usado.
-6. **Testing:** Si es lógica de negocio crítica, crear un test en Pest (`php artisan make:test --pest NombreTest`).
-7. **PR:** Hacer Push y Pull Request a `develop`.
-
-### HU-14: Galería Pública de Mascotas
-**Solución Implementada:**
-* Se creó el `HomeController` para manejar la página de inicio.
-* Se implementó una consulta con **Eager Loading** (`with('refugio')`) para optimizar el rendimiento (evita el problema N+1 de consultas SQL).
-* Se utiliza **Paginación Nativa** de Laravel (12 ítems por página) para no sobrecargar el servidor.
-* La vista se maquetó con **Tailwind CSS** usando CSS Grid (`grid-cols-1 md:grid-cols-4`) garantizando que sea 100% responsiva.
-
-**Patrones de Diseño Usados:**
-1. **MVC:** Separación entre controlador (`HomeController`), modelo (`Publicacion`) y vista (`welcome.blade.php`).
-2. **Active Record:** Uso de `Publicacion::with()->where()->paginate()`.
-
-**Deuda Técnica:**
-* Actualmente el botón "Ver Detalle" no redirige a ninguna parte (`href="#"`). Se resolverá en la siguiente HU (HU-15).
-
-### HU-15: Detalle de Publicación
-**Solución Implementada:**
-* Se implementó **Route Model Binding** en Laravel para capturar la publicación directamente desde la URL.
-* Se aplicó una validación de seguridad en el controlador: si la publicación no está `activa`, devuelve un error 404.
-* Vista responsiva de dos columnas (escritorio) / una columna (móvil) usando CSS Grid de Tailwind.
-
-**Patrones de Diseño:**
-1. **Route Model Binding:** Abstracción de la búsqueda en base de datos a nivel de enrutamiento.
-2. **MVC:** Separación del controlador (`HomeController@show`) y la vista (`publicaciones.show`).
-
-### HU-16: Creación de Solicitud de Adopción
-**Solución Implementada:**
-* Se implementó un Controlador (`SolicitudController`) para procesar el formulario de adopción.
-* Se aplicaron validaciones estrictas: el adoptante no puede duplicar solicitudes, y una publicación no puede superar las 3 solicitudes activas.
-* Se utilizó una **Transacción de Base de Datos (`DB::transaction`)** para guardar la solicitud y, si es la tercera, actualizar automáticamente el estado de la publicación a `completa` de forma segura.
-
-**Patrones de Diseño:**
-1. **Transaction Script:** Uso de `DB::transaction` para garantizar la integridad de los datos al cambiar el estado de la publicación.
-2. **Active Record:** Uso de los modelos `Solicitud` y `Publicacion`.
-3. **MVC:** El formulario (Vista) envía los datos al Controlador, que procesa y guarda en el Modelo.
-
-### HU-18: Ver Solicitudes del Adoptante
-**Solución Implementada:**
-* Se creó el `DashboardController` para el perfil del adoptante.
-* Se implementó **Eager Loading** (`with('publicacion')`) para cargar los datos de las mascotas solicitadas sin hacer consultas N+1 a la base de datos.
-* La vista utiliza **Tailwind CSS** para las tarjetas de estado, mostrando badges de diferentes colores (amarillo para pendiente, verde para aceptada) y es 100% responsiva (flex-col en móviles, flex-row en escritorio).
-
-**Patrones de Diseño:**
-1. **MVC:** Separación de la lógica (`DashboardController`), datos (`Solicitud`) y presentación (`adoptante.dashboard`).
-2. **Active Record:** Uso de la relación `$adoptante->solicitudes()`.
-
-### HU-19: Gestión de Solicitudes por Refugio
-**Solución Implementada:**
-* Se creó el controlador `Refugio\SolicitudRefugioController` con métodos `index` y `show`.
-* Se aplicó **Eager Loading** (`with(['publicacion','adoptante.user'])`) para evitar consultas N+1 y optimizar el rendimiento.
-* **Seguridad:** Se implementó una validación en el método `show` para que el refugio solo pueda ver las solicitudes de sus propias publicaciones (retorna 403 si intenta ver una ajena).
-* Se agregó un filtro opcional por estado de la solicitud.
-* Las vistas utilizan Tailwind CSS y son responsivas.
-
-**Patrones de Diseño:**
-1. **MVC:** Separación de responsabilidades entre el controlador, los modelos y las vistas.
-2. **Active Record:** Uso de las relaciones de Eloquent (`$solicitud->adoptante->user`).
-3. **Route Model Binding:** El método `show` recibe automáticamente la `Solicitud` desde la URL.
-4. **Eager Loading:** Uso de `with()` para cargar relaciones de forma eficiente.
-
-**Deuda Técnica:**
-* Las acciones para que el refugio acepte o rechace la solicitud (botones de acción) se implementarán en las HUs 20 y 21.
-
-### HU-20: Aceptar Solicitud de Adopción
-**Solución Implementada:**
-* Se añadió el método `aceptar` en `SolicitudRefugioController`, protegido por validación de pertenencia (403 si la solicitud no es del refugio).
-* Se validó que la solicitud esté en estado `pendiente` o `en_entrevista`.
-* Se usó **DB::transaction** para garantizar atomicidad: aceptar la solicitud, cambiar la publicación a `adoptada`, cerrar las demás solicitudes activas y crear el registro en `adopciones`.
-* Se agregó test Pest con `RefreshDatabase` cubriendo happy path y control de acceso.
-
-**Patrones de Diseño:**
-1. **Transaction Script:** `DB::transaction` coordina 3 tablas (`solicitudes`, `publicaciones`, `adopciones`).
-2. **Active Record:** `update()` y `create()` sobre modelos Eloquent.
-3. **MVC:** Lógica en controlador, datos en modelos, presentación en Blade.
-4. **Route Model Binding:** La solicitud se inyecta desde la URL.
-
-**Deuda Técnica:**
-* Lógica en controlador; cuando supere las 50 líneas, extraer a `AceptarSolicitudService` (Service Layer, ver `docs/ARQUITECTURA.md`).
-
-### HU-21: Revertir Adopción
-**Solución Implementada:**
-* Se añadió el método `revertir` en `SolicitudRefugioController`, protegido por validación de pertenencia (403 si la solicitud no es del refugio).
-* Se validó que exista una adopción `activa` asociada a la solicitud; si no, redirige con error.
-* Se usó **DB::transaction** para garantizar atomicidad: cancelar la adopción (`estado_adopcion='cancelada'` + motivo), devolver la publicación a `completa` y la solicitud a `pendiente`.
-* Se agregó test Pest con `RefreshDatabase` cubriendo happy path, control de acceso y validación de adopción inexistente.
-
-**Patrones de Diseño:**
-1. **Transaction Script:** `DB::transaction` coordina 3 tablas (`adopciones`, `publicaciones`, `solicitudes`).
-2. **Active Record:** `update()` sobre modelos Eloquent.
-3. **MVC:** Lógica en controlador, datos en modelos, presentación en Blade.
-4. **Route Model Binding:** La solicitud se inyecta desde la URL.
-
-**Decisiones de negocio:**
-* Las solicitudes que se cerraron en HU-20 **no se reabren** al revertir; solo se reactiva la solicitud que había sido aceptada. El BACKLOG no pide reapertura.
-
-**Fix incluido (deuda de HU-20):**
-* Se completaron `AdoptanteFactory`, `RefugioFactory`, `PublicacionFactory`, `SolicitudFactory` y `AdopcionFactory` con sus claves foráneas (`user_id`, `refugio_id`, `publicacion_id`, `adoptante_id`). HU-20 no las necesitaba porque sus tests pasaban FKs explícitas, pero HU-21 usa los factories sin todas las FKs.
-
-**Deuda Técnica:**
-* Lógica en controlador; cuando supere las 50 líneas, extraer a `RevertirAdopcionService` (Service Layer, ver `docs/ARQUITECTURA.md`).
-
-### HU-22: Estado Post-Adopción de la Mascota
-**Solución Implementada:**
-* Se creó `Refugio\AdopcionController` con el método `updateEstado`.
-* Se implementó un formulario con `@method('PATCH')` para actualizar el estado.
-* **Seguridad:** Se validó que solo el refugio dueño de la publicación pueda cambiar el estado de la mascota (retorna 403 si es ajeno).
-* **Validación:** Se usó `Rule::in()` para aceptar solo los estados permitidos por la base de datos (adoptada, fallecida, robada, perdida).
-
-**Patrones de Diseño:**
-1. **MVC:** Separación de la lógica en el Controlador y la vista en Blade.
-2. **Active Record:** Uso de `$adopcion->update()` para modificar el estado.
-
-**Deuda Técnica (Trade-offs):**
-* La actualización del estado post-adopción depende de que exista un registro en la tabla `adopciones`. Como la HU-20 (Aceptar Solicitud) aún está en desarrollo por el equipo, la creación de este registro y el listado de adopciones se probaron localmente usando *Factories*. Una vez que la HU-20 se integre en `develop`, el flujo de la HU-22 quedará completo de punta a punta.
-
-### HU-23: Notificar Refugio
-**Solución Implementada:**
-* Se creó la migración `create_notifications_table` (Laravel 11+ no la trae por defecto).
-* Se creó la notificación `NuevaSolicitudRecibida` con canal `database` y `toDatabase()`.
-* Se usó `afterCommit()` para garantizar que la cola no procese la notificación antes del commit de la transacción de creación de la solicitud.
-* Se modificó `SolicitudController@store` para que la transacción retorne la `$solicitud` y, después del commit, se envíe la notificación al `User` del refugio dueño de la publicación.
-* Se agregó test Pest con `RefreshDatabase` y `Notification::fake()` cubriendo el envío y la persistencia en la tabla `notifications`.
-
-**Patrones de Diseño:**
-1. **Notification (canal database):** Laravel nativo, persistencia en tabla `notifications` con UUID.
-2. **Active Record:** `$refugioUser->notify()` y relaciones Eloquent.
-3. **MVC:** Lógica en controlador, notificación en clase dedicada, datos en modelos.
-4. **Transaction Script:** Se mantiene el `DB::transaction` de HU-16 y se envía la notificación después del commit.
-
-**Deuda Técnica:**
-* La notificación es solo in-app (database). Si el PM pide email o push, se añadirían canales adicionales en `via()`.
-
-### HU-24: Notificaciones al Adoptante
-**Solución Implementada:**
-* Se creó la clase `SolicitudStatusNotification` para manejar notificaciones in-app guardadas en la base de datos.
-* Se creó `Adoptante\NotificacionController` con métodos `index` (listar) y `markAsRead` (marcar como leída).
-* Se agregó la migración nativa de Laravel para la tabla `notifications`.
-* Vistas responsivas con Tailwind CSS para diferenciar notificaciones leídas y no leídas.
-
-**Patrones de Diseño:**
-1. **MVC:** Separación de lógica en el Controlador, la Clase de Notificación y la vista Blade.
-2. **Active Record:** Uso de relaciones polimórficas `$user->notifications()`.
-3. **Notification Pattern:** Uso de la clase Notification de Laravel para estructurar el aviso.
-
-**Deuda Técnica (Trade-offs):**
-* El envío real de la notificación depende de que las HUs 20 y 21 (Aceptar/Revertir Solicitud) invoquen la clase `SolicitudStatusNotification`. Por ahora, el flujo fue probado localmente usando Factories y llamadas directas en los tests.
-
-### HU-25: Purga de Notificaciones
-**Solución Implementada:**
-* Se creó el modelo `Notification` con el trait `MassPrunable`.
-* Se definió `prunable()` para eliminar notificaciones con más de 90 días de antigüedad.
-* Se programó la tarea diaria `model:prune` en `routes/console.php` con `onOneServer()` y `withoutOverlapping()` (Laravel 13).
-* Se agregó test Pest con `RefreshDatabase` verificando que solo se eliminan las notificaciones antiguas.
-
-**Patrones de Diseño:**
-1. **MassPrunable:** Trait nativo de Laravel para purga masiva eficiente.
-2. **Active Record:** Uso de `Notification::where()` para definir la condición de poda.
-3. **Task Scheduling:** Programación de tareas con `Schedule::command()` en `routes/console.php`.
-
-**Decisiones de seguridad:**
-* El `id` (UUID) de `notifications` **no está en `$fillable`** para evitar asignación masiva. En tests se usa `forceCreate()`.
-
-**Deuda Técnica:**
-* La purga es automática (diaria). Si el PM requiere un botón manual en el panel admin, se añadiría un controlador y una ruta adicionales.
-
-### HU-26: Listado de Usuarios (Admin)
-**Solución Implementada:**
-* Se creó `Admin\UsuarioController` (solo lectura) con métodos `adoptantes()` y `refugios()`, sin modificar `Admin\RefugioController` (HU-09).
-* **Eager Loading** (`with('user')`) para evitar el problema N+1.
-* **Paginación nativa** de 15 ítems por página.
-* Vistas Blade responsivas (`overflow-x-auto`) con la paleta oficial (thead negro, acentos emerald).
-
-**Patrones de Diseño:**
-1. **MVC:** Controlador (`Admin\UsuarioController`), modelos (`Adoptante`, `Refugio`) y vistas (`admin.usuarios.*`).
-2. **Active Record + Eager Loading:** `Adoptante::with('user')->paginate()`.
-3. **Middleware:** Rutas protegidas con `role:admin` dentro del grupo `auth` existente.
-
-**Deuda Técnica:**
-* Si se agregan filtros/búsqueda/exportación, extraer a `Admin\UsuarioService` (Service Layer).
-* Botones de editar/bloquear refugio quedan para HU-10 (no se implementaron para no adelantar alcance).
-
-### HU-27: Ver y Gestionar Publicaciones (Admin)
-**Solución Implementada:**
-* Se creó `Admin\PublicacionController` con métodos `index`, `destroy` y `restore`.
-* El admin puede ver todas las publicaciones (incluidas las dadas de baja lógicamente) gracias al uso de `withTrashed()` en la consulta.
-* Se implementó **SoftDelete** para dar de baja publicaciones sin perder el historial (consistente con el esquema de BASE_DE_DATOS.md).
-* La restauración permite al admin recuperar publicaciones dadas de baja (`restore()`).
-* Se agregó un alias (`AdminPublicacionController`) en `routes/web.php` para evitar el conflicto de nombres con `Refugio\PublicacionController` (HU-11).
-* Vistas Blade responsivas con la paleta oficial (thead negro, acentos emerald/rojo según el estado).
-
-**Patrones de Diseño:**
-1. **MVC:** Controlador (`Admin\PublicacionController`), modelos (`Publicacion`) y vistas (`admin.publicaciones.*`).
-2. **Active Record + SoftDeletes:** Uso de `withTrashed()`, `onlyTrashed()`, `restore()` y `delete()` sobre el modelo `Publicacion`.
-3. **Middleware:** Rutas protegidas con `role:admin` dentro del grupo `auth` existente.
-4. **Route Model Binding:** El método `destroy` recibe automáticamente la `Publicacion` desde la URL.
-
-**Deuda Técnica:**
-* La lógica de negocio (validación de pertenencia, restauración) vive en el controlador. Si se agregan filtros por estado o por refugio, o el controlador supera las 50 líneas, extraer a `Admin\PublicacionService` (Service Layer, ver `docs/ARQUITECTURA.md`).
-* No se implementó paginación de resultados; si el volumen de publicaciones crece, agregar `paginate(15)` en el método `index`.
-
-### HU-28: Dashboards de Estadísticas (Admin y Refugio)
-**Solución Implementada:**
-* Se creó `EstadisticaService` (Service Layer) que centraliza las consultas agregadas para ambos dashboards, respetando SRP y manteniendo los controladores por debajo de las 50 líneas (docs/ARQUITECTURA.md sección 2).
-* Se convirtieron los closures de `admin/dashboard` y `refugio/dashboard` en `Admin\DashboardController@index` y `Refugio\DashboardController@index`. Los nombres de ruta (`admin.dashboard`, `refugio.dashboard`) no cambiaron: los links existentes siguen funcionando.
-* El refugio solo ve métricas de sus propias publicaciones (validación de pertenencia por `refugio_id`).
-* Vistas Blade responsivas (`grid-cols-1 sm:grid-cols-2 lg:grid-cols-4`) con tarjetas de métricas y desglose de publicaciones por estado. Se conservó el contenido original de ambas vistas (mensajes de bienvenida, `session('success')`, botones existentes).
-
-**Patrones de Diseño:**
-1. **Service Layer:** `App\Services\EstadisticaService` (nuevo, según ARQUITECTURA.md sección 2).
-2. **Dependency Injection:** El service se inyecta en el constructor de los controladores.
-3. **MVC:** Controladores delgados, datos en modelos, presentación en Blade.
-4. **Active Record + agregados:** `count()`, `whereIn()`, `selectRaw('estado, count(*) as total')->groupBy('estado')` (agregado necesario, no SQL crudo de negocio).
-5. **Middleware:** Rutas protegidas con `role:admin` / `role:refugio`.
-
-**Decisión de diseño:**
-* Se descartó crear rutas nuevas (`admin/estadisticas`) porque duplicaría puntos de entrada y dejaría un closure residual como deuda técnica. Convertir los closures a controladores elimina deuda existente y mantiene los nombres de ruta, evitando links rotos.
-
-**Deuda Técnica:**
-* No se agregaron gráficos (Chart.js). Si el PM los pide, se puede añadir un componente Blade que reciba `$porEstado` como JSON.
-* Si se agregan filtros por rango de fechas, extender `EstadisticaService` con parámetros opcionales (`?Carbon $desde`, `?Carbon $hasta`).
-
-### HU-31: Integración Continua (CI/CD)
-**Solución Implementada:**
-* Se configuró un pipeline de **GitHub Actions** (`.github/workflows/ci.yml`).
-* **Quality Gate:** Cada vez que se crea un Pull Request hacia `develop` o `main`, GitHub levanta un entorno Ubuntu 24.04 con PHP 8.4, instala dependencias, compila Vite y ejecuta los tests de Pest.
-* **Bloqueo automático:** Si un test falla (por ejemplo, por no usar `RefreshDatabase` y no encontrar las tablas), el PR se marca en rojo y **no puede ser mergeado**, garantizando que código roto nunca llegue a producción.
+---
 
 ## 🤝 Guía para Nuevos Desarrolladores (Onboarding)
 
