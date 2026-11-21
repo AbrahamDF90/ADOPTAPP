@@ -184,3 +184,16 @@ Cada vez que tomes una HU de Jira/GitHub Projects, seguí este flujo estándar p
 5. **Documentar:** Comentar el código explicando el patrón de diseño usado.
 6. **Testing:** Si es lógica de negocio crítica, crear un test en Pest (`php artisan make:test --pest NombreTest`).
 7. **PR:** Hacer Push y Pull Request a `develop`.
+
+### HU-12: Edición de Publicación (Refugio)
+**Solución Implementada:**
+* Se añadieron los métodos `edit` y `update` al `Refugio\PublicacionController`.
+* **Seguridad:** Se validó la pertenencia de la publicación (403 si el refugio intenta editar una mascota ajena).
+* **Storage Pattern:** Si se sube una nueva foto, se elimina la anterior del disco para no acumular basura. Si no se sube foto, se conserva la existente.
+* **Active Record:** Actualización de los campos de la publicación.
+
+**Patrones de Diseño:**
+1. **MVC:** Controlador (`PublicacionController`), Modelo (`Publicacion`), Vista (`edit.blade.php`).
+2. **Active Record:** Uso de `$publicacion->save()`.
+3. **Storage Pattern:** Abstracción del manejo de archivos.
+4. **Route Model Binding:** Inyección automática de la `Publicacion` desde la URL.

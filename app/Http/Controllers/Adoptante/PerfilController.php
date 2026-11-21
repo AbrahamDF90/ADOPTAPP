@@ -10,19 +10,20 @@ class PerfilController extends Controller
 {
     /**
      * Muestra el formulario de edición del perfil del adoptante.
-     * 
+     *
      * Patrón de Diseño: MVC (Retorna la vista de edición).
      * Seguridad: Middleware 'role:adoptante' asegura que solo entre el dueño.
      */
     public function edit()
     {
         $adoptante = auth()->user()->adoptante;
+
         return view('adoptante.perfil.edit', compact('adoptante'));
     }
 
     /**
      * Actualiza los datos del adoptante.
-     * 
+     *
      * Patrón de Diseño: Active Record (Uso de $request->user() y save()).
      * Regla de Negocio: El DNI no se puede editar (es la clave para el historial).
      */
