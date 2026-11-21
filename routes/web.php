@@ -74,6 +74,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/publicaciones', [AdminPublicacionController::class, 'index'])->name('admin.publicaciones.index');
     Route::delete('/publicaciones/{publicacion}', [AdminPublicacionController::class, 'destroy'])->name('admin.publicaciones.destroy');
     Route::post('/publicaciones/{id}/restaurar', [AdminPublicacionController::class, 'restore'])->name('admin.publicaciones.restore');
+    // HU-10: Editar y Bloquear Refugios
+    Route::get('/refugios/{refugio}/editar', [RefugioController::class, 'edit'])->name('admin.refugios.edit');
+    Route::patch('/refugios/{refugio}', [RefugioController::class, 'update'])->name('admin.refugios.update');
+    Route::patch('/refugios/{refugio}/toggle', [RefugioController::class, 'toggleActivo'])->name('admin.refugios.toggle');
 });
 
 // =========================================================================
