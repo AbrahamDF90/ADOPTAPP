@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Adoptante;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class PerfilController extends Controller
@@ -57,5 +59,43 @@ class PerfilController extends Controller
         $adoptante->save();
 
         return back()->with('success', 'Perfil actualizado correctamente.');
+    }
+
+    /**
+     * Da de baja la cuenta del adoptante (SoftDelete).
+     *
+     * Patrones de Diseño:
+     * 1. SoftDeletes: Se usa el borrado lógico para no perder el historial de adopciones.
+     * 2. Transaction Script: Se usa DB::transaction para cancelar las solicitudes y borrar la cuenta de forma atómica.
+     *
+     * Regla de Negocio: Al darse de baja, todas sus solicitudes pendientes o en entrevista se cancelan.
+     */
+    public function destroy(Request $request)
+    {
+        $user = $request->user();
+        $adoptante = $user->adoptante;
+
+        // 1. Transacción para asegurar integridad de datos
+        DB::transaction(function () use ($user, $adoptante) {
+
+            // 2. Cancelar solicitudes activas del adoptante
+            $adoptante->solicitudes()
+                ->whereIn('estado', ['pendiente', 'en_entrevista'])
+                ->update([
+                    'estado' => 'cancelada',
+                    'motivo_cierre' => 'Cuenta del adoptante dada de baja.',
+                ]);
+
+            // 3. Borrar lógicamente el perfil de adoptante y el usuario
+            $adoptante->delete(); // SoftDelete en tabla adoptantes
+            $user->delete();      // SoftDelete en tabla users
+        });
+
+        // 4. Cerrar sesión y redirigir
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/')->with('success', 'Tu cuenta ha sido dada de baja correctamente. Esperamos verte pronto.');
     }
 }

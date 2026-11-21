@@ -56,6 +56,19 @@
                         </button>
                     </div>
                 </form>
+                </form> <!-- Fin del formulario de edición -->
+                                <div class="mt-12 pt-6 border-t border-gray-200">
+                                    <h3 class="text-lg font-bold text-red-600 mb-2">Zona de Peligro</h3>
+                                    <p class="text-sm text-gray-600 mb-4">Al dar de baja tu cuenta, tus solicitudes pendientes se cancelarán. Podés volver a registrarte en el futuro con el mismo DNI y recuperar tu historial.</p>
+                    
+                    <form method="POST" action="{{ route('adoptante.perfil.destroy') }}" onsubmit="return confirm('¿Estás completamente seguro de que querés dar de baja tu cuenta?');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition">
+                            Dar de baja mi cuenta
+                        </button>
+                    </form>
+                </div>
 
             </div>
         </div>
