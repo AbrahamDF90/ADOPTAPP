@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Adoptante extends Model
 {
+    // Asegurate de que esta línea tenga el SoftDeletes
     use HasFactory, SoftDeletes;
 
     protected $fillable = ['user_id', 'dni', 'alias', 'direccion', 'telefono', 'foto'];

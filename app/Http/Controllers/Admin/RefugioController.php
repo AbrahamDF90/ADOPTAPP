@@ -67,4 +67,59 @@ class RefugioController extends Controller
         // Redirección al panel con mensaje de éxito
         return redirect()->route('admin.dashboard')->with('success', 'Refugio creado con éxito.');
     }
+
+    /**
+     * Muestra el formulario para editar un refugio.
+     */
+    public function edit(Refugio $refugio)
+    {
+        return view('admin.refugios.edit', compact('refugio'));
+    }
+
+    /**
+     * Actualiza los datos del refugio.
+     *
+     * Patrón: Active Record.
+     */
+    public function update(Request $request, Refugio $refugio)
+    {
+        $request->validate([
+            'nombre' => ['required', 'string', 'max:255'],
+            'ubicacion' => ['required', 'string', 'max:255'],
+            'direccion' => ['required', 'string', 'max:255'],
+            'telefono' => ['required', 'string', 'max:50'],
+        ]);
+
+        $refugio->update($request->only('nombre', 'ubicacion', 'direccion', 'telefono'));
+
+        return redirect()->route('admin.refugios.index')->with('success', 'Refugio actualizado correctamente.');
+    }
+
+    /**
+     * Bloquea o desbloquea un refugio.
+     *
+     * Patrones de Diseño:
+     * 1. Transaction Script: Al bloquear, también se dan de baja todas sus publicaciones activas.
+     * 2. Active Record: Uso de update() en el refugio y en sus publicaciones.
+     */
+    public function toggleActivo(Refugio $refugio)
+    {
+        DB::transaction(function () use ($refugio) {
+            // Invertimos el estado actual (si está activo, lo bloqueamos; si está bloqueado, lo activamos)
+            $nuevoEstado = ! $refugio->activo;
+            $refugio->update(['activo' => $nuevoEstado]);
+
+            // Si se está bloqueando (activo = false), damos de baja sus publicaciones activas
+            if (! $nuevoEstado) {
+                $refugio->publicaciones()->where('estado', 'activa')->update([
+                    'estado' => 'baja',
+                    'motivo_baja' => 'Refugio bloqueado por el administrador.',
+                ]);
+            }
+        });
+
+        $mensaje = $refugio->activo ? 'Refugio habilitado correctamente.' : 'Refugio bloqueado y sus publicaciones dadas de baja.';
+
+        return back()->with('success', $mensaje);
+    }
 }

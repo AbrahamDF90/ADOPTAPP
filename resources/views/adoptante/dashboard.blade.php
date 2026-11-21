@@ -9,9 +9,12 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
                 
-                {{-- Mensaje de éxito si se envía una solicitud --}}
+                {{-- Mensaje de éxito si se envía o cancela una solicitud --}}
                 @if(session('success'))
                     <div class="bg-emerald-100 text-emerald-800 p-3 rounded mb-4">{{ session('success') }}</div>
+                @endif
+                @if(session('error'))
+                    <div class="bg-red-100 text-red-800 p-3 rounded mb-4">{{ session('error') }}</div>
                 @endif
 
                 {{-- Listado de tarjetas de solicitudes --}}
@@ -24,15 +27,25 @@
                                 <img src="{{ asset('storage/' . $solicitud->publicacion->foto) }}" class="w-16 h-16 object-cover rounded-md" alt="Mascota">
                                 <div>
                                     <h4 class="font-bold text-gray-800">{{ $solicitud->publicacion->especie }}</h4>
-                                    {{-- Formateo de fecha con Carbon (incluido en Laravel) --}}
+                                    {{-- Formateo de fecha con Carbon --}}
                                     <p class="text-sm text-gray-500">Solicitado el: {{ $solicitud->created_at->format('d/m/Y') }}</p>
                                 </div>
                             </div>
 
-                            {{-- Badge de estado (Lógica condicional) --}}
-                            <div class="w-full sm:w-auto text-right">
+                            {{-- Badge de estado y Botón de Cancelar --}}
+                            <div class="w-full sm:w-auto flex flex-col items-end gap-2">
                                 @if($solicitud->estado === 'pendiente')
                                     <span class="inline-block bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-bold">Pendiente</span>
+                                    
+                                    {{-- HU-17: Formulario para cancelar la solicitud --}}
+                                    <form method="POST" action="{{ route('adoptante.solicitudes.cancelar', $solicitud) }}" onsubmit="return confirm('¿Seguro que querés cancelar esta solicitud?');">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="text-red-500 hover:text-red-700 text-sm font-semibold hover:underline">
+                                            Cancelar Solicitud
+                                        </button>
+                                    </form>
+
                                 @elseif($solicitud->estado === 'aceptada')
                                     <span class="inline-block bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-sm font-bold">¡Aceptada!</span>
                                 @else
