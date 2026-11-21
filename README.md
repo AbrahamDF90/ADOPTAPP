@@ -197,3 +197,15 @@ Cada vez que tomes una HU de Jira/GitHub Projects, seguí este flujo estándar p
 2. **Active Record:** Uso de `$publicacion->save()`.
 3. **Storage Pattern:** Abstracción del manejo de archivos.
 4. **Route Model Binding:** Inyección automática de la `Publicacion` desde la URL.
+
+### HU-08: Baja de Cuenta del Adoptante
+**Solución Implementada:**
+* Se agregó el método `destroy` al `Adoptante\PerfilController` para procesar la baja del usuario.
+* **Transaction Script:** Se utilizó `DB::transaction` para garantizar la atomicidad del proceso: se cancelan las solicitudes activas del adoptante y luego se borra lógicamente su perfil y su cuenta de usuario.
+* **SoftDeletes:** Se implementó el borrado lógico en los modelos `User` y `Adoptante` para no perder el historial de adopciones. Si el usuario se vuelve a registrar con el mismo DNI, el sistema podrá recuperar su historial previo.
+* **Seguridad:** Se cerró la sesión del usuario (`Auth::logout()`) y se invalidó la sesión tras la baja.
+
+**Patrones de Diseño:**
+1. **SoftDeletes:** Trait de Laravel para borrado lógico.
+2. **Transaction Script:** Uso de `DB::transaction` para asegurar la integridad de los datos.
+3. **MVC:** Lógica en el Controlador y botón de acción en la Vista.
