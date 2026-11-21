@@ -82,4 +82,42 @@ class SolicitudController extends Controller
         return redirect()->route('publicaciones.show', $publicacion)
             ->with('success', '¡Solicitud enviada con éxito! El refugio se contactará con vos.');
     }
+
+    /**
+     * Cancela una solicitud de adopción pendiente.
+     *
+     * Patrones de Diseño:
+     * 1. Active Record: Uso del modelo Solicitud.
+     * 2. Transaction Script: Si la publicación estaba "completa" (por haber llegado a 3 solicitudes), al cancelar esta, vuelve a estar "activa".
+     *
+     * Regla de Negocio: Solo se pueden cancelar solicitudes en estado 'pendiente'.
+     */
+    public function cancelar(Solicitud $solicitud)
+    {
+        // Seguridad: Verificar que el adoptante logueado sea el dueño de la solicitud
+        if ($solicitud->adoptante_id !== auth()->user()->adoptante->id) {
+            abort(403, 'No tenés permiso para cancelar esta solicitud.');
+        }
+
+        // Validación: Solo se pueden cancelar las pendientes
+        if ($solicitud->estado !== 'pendiente') {
+            return back()->with('error', 'Solo podés cancelar solicitudes en estado pendiente.');
+        }
+
+        DB::transaction(function () use ($solicitud) {
+            // 1. Cambiamos el estado de la solicitud
+            $solicitud->update([
+                'estado' => 'cancelada',
+                'motivo_cierre' => 'Cancelada por el adoptante.',
+            ]);
+
+            // 2. Si la publicación estaba 'completa' (porque ya tenía 3), la volvemos a 'activa'
+            $publicacion = $solicitud->publicacion;
+            if ($publicacion->estado === 'completa') {
+                $publicacion->update(['estado' => 'activa']);
+            }
+        });
+
+        return back()->with('success', 'Solicitud cancelada correctamente.');
+    }
 }
