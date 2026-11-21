@@ -99,6 +99,9 @@ Route::middleware(['auth', 'role:refugio'])->prefix('refugio')->name('refugio.')
 
     // HU-22
     Route::patch('/adopciones/{adopcion}/estado', [AdopcionController::class, 'updateEstado'])->name('adopciones.estado');
+
+    // HU-13: Dar de baja publicación
+    Route::delete('/publicaciones/{publicacion}', [PublicacionController::class, 'destroy'])->name('publicaciones.destroy');
 });
 
 // =========================================================================

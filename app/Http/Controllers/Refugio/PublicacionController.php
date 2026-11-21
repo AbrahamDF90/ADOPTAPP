@@ -109,4 +109,35 @@ class PublicacionController extends Controller
 
         return redirect()->route('refugio.dashboard')->with('success', 'Publicación actualizada correctamente.');
     }
+
+    /**
+     * Da de baja lógica (SoftDelete) una publicación del refugio.
+     *
+     * Patrones: Active Record y SoftDeletes.
+     * Seguridad: Validación de pertenencia (el refugio solo borra sus mascotas).
+     * Regla de Negocio: La mascota no se borra de la base de datos, solo se marca como eliminada.
+     */
+    public function destroy(Request $request, Publicacion $publicacion)
+    {
+        // Validación de pertenencia
+        if ($publicacion->refugio_id !== auth()->user()->refugio->id) {
+            abort(403, 'No tenés permiso para dar de baja esta publicación.');
+        }
+
+        // Validación del motivo (requerido para saber por qué se dio de baja)
+        $request->validate([
+            'motivo_baja' => ['required', 'string', 'max:255'],
+        ]);
+
+        // Actualizamos el estado y guardamos el motivo antes de borrar
+        $publicacion->update([
+            'estado' => 'baja',
+            'motivo_baja' => $request->motivo_baja,
+        ]);
+
+        // Aplicamos el SoftDelete (borrado lógico)
+        $publicacion->delete();
+
+        return redirect()->route('refugio.dashboard')->with('success', 'Publicación dada de baja correctamente.');
+    }
 }
