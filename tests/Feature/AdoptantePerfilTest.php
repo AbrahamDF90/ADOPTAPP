@@ -1,10 +1,10 @@
 <?php
 
-use App\Models\User;
 use App\Models\Adoptante;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
@@ -14,7 +14,7 @@ uses(RefreshDatabase::class);
  */
 test('un adoptante puede actualizar su perfil sin modificar su DNI', function () {
     Storage::fake('public');
-    
+
     $user = User::factory()->create(['role' => 'adoptante']);
     $adoptante = Adoptante::create([
         'user_id' => $user->id,

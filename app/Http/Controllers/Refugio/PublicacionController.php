@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Publicacion;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class PublicacionController extends Controller
 {
@@ -50,5 +51,62 @@ class PublicacionController extends Controller
 
         // 4. Redirigimos al panel del refugio (lo crearemos después)
         return redirect()->route('refugio.dashboard')->with('success', 'Mascota publicada con éxito.');
+    }
+
+    /**
+     * Muestra el formulario para editar una publicación existente.
+     *
+     * Patrón: MVC (Retorna la vista).
+     * Seguridad: Validación de pertenencia (el refugio solo edita sus propias mascotas).
+     */
+    public function edit(Publicacion $publicacion)
+    {
+        // Verificamos que la publicación pertenezca al refugio logueado
+        if ($publicacion->refugio_id !== auth()->user()->refugio->id) {
+            abort(403, 'No tenés permiso para editar esta publicación.');
+        }
+
+        return view('refugio.publicaciones.edit', compact('publicacion'));
+    }
+
+    /**
+     * Actualiza los datos de la publicación en la base de datos.
+     *
+     * Patrones: Active Record y Storage Pattern (para la foto).
+     * Regla de Negocio: La foto es opcional al editar. Si no se sube una nueva, se mantiene la anterior.
+     */
+    public function update(Request $request, Publicacion $publicacion)
+    {
+        // Validación de pertenencia
+        if ($publicacion->refugio_id !== auth()->user()->refugio->id) {
+            abort(403, 'No tenés permiso para editar esta publicación.');
+        }
+
+        // Validación de datos (la foto es 'nullable' porque no es obligatorio cambiarla)
+        $request->validate([
+            'foto' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'especie' => ['required', 'string', 'max:50'],
+            'sexo' => ['required', 'string', 'max:20'],
+            'edad_aproximada' => ['required', 'string', 'max:50'],
+        ]);
+
+        // Si se subió una nueva foto, reemplazamos la anterior
+        if ($request->hasFile('foto')) {
+            // Borramos la foto vieja del disco
+            if ($publicacion->foto && Storage::disk('public')->exists($publicacion->foto)) {
+                Storage::disk('public')->delete($publicacion->foto);
+            }
+            // Guardamos la nueva
+            $rutaFoto = $request->file('foto')->store('publicaciones', 'public');
+            $publicacion->foto = $rutaFoto;
+        }
+
+        // Actualizamos los datos (Active Record)
+        $publicacion->especie = $request->especie;
+        $publicacion->sexo = $request->sexo;
+        $publicacion->edad_aproximada = $request->edad_aproximada;
+        $publicacion->save();
+
+        return redirect()->route('refugio.dashboard')->with('success', 'Publicación actualizada correctamente.');
     }
 }
