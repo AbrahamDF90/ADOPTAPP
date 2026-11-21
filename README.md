@@ -232,3 +232,14 @@ Cada vez que tomes una HU de Jira/GitHub Projects, seguí este flujo estándar p
 **Patrones de Diseño:**
 1. **SoftDeletes:** Para conservar el historial y permitir restauraciones (como hace el Admin en la HU-27).
 2. **Active Record:** Uso de `update()` y `delete()` sobre el modelo.
+
+### HU-10: Editar y Bloquear Refugios (Admin)
+**Solución Implementada:**
+* Se añadieron los métodos `edit`, `update` y `toggleActivo` al `Admin\RefugioController`.
+* **Seguridad:** Solo el administrador puede acceder a estas rutas (middleware `role:admin`).
+* **Regla de Negocio:** Al bloquear un refugio, todas sus publicaciones activas cambian automáticamente a estado `baja` con el motivo "Refugio bloqueado por el administrador".
+* **Transaction Script:** Uso de `DB::transaction` para garantizar que el bloqueo del refugio y la baja de sus publicaciones sean operaciones atómicas.
+
+**Patrones de Diseño:**
+1. **Transaction Script:** Para coordinar la actualización del refugio y sus publicaciones.
+2. **Active Record:** Uso de `update()` sobre el modelo `Refugio` y su relación `publicaciones()`.

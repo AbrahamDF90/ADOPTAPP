@@ -15,7 +15,7 @@ Este documento es la hoja de ruta del proyecto.
 *   **HU-09 ✅ (Alta Refugio):** Admin puede crear cuentas de refugios. (Controlador `Admin\RefugioController`).
 *   **HU-07 ✅ (Perfil Adoptante):** El adoptante puede editar su foto, alias, dirección y teléfono. (No puede editar DNI). *Ruta sugerida: `adoptante/perfil/edit`*.
 *   **HU-08 ✅ (Baja Adoptante):** El adoptante puede darse de baja (SoftDelete). Sus solicitudes pendientes se cancelan. Al volver a registrarse con el mismo DNI, recupera historial.
-*   **HU-10 ⏳ (Editar/Bloquear Refugio):** Admin puede editar datos del refugio o bloquearlo (si se bloquea, sus publicaciones pasan a estado "baja").
+*   **HU-10 ✅ (Editar/Bloquear Refugio):** Admin puede editar datos del refugio o bloquearlo (si se bloquea, sus publicaciones pasan a estado "baja").
 *   **HU-11 ✅ (Crear Publicación):** Refugio sube foto de mascota...create`*.
 *   **HU-12 ✅ (Editar Publicación):** Refugio edita foto o datos de su publicación.
 *   **HU-13 ✅ (Baja Publicación):** Refugio da de baja lógica una publicación con un motivo (ej: falleció).
