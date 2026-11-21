@@ -54,6 +54,8 @@ Route::middleware(['auth', 'role:adoptante'])->prefix('mi-perfil')->group(functi
     Route::patch('/perfil', [PerfilController::class, 'update'])->name('adoptante.perfil.update');
     // HU-08: Dar de baja la cuenta
     Route::delete('/perfil', [PerfilController::class, 'destroy'])->name('adoptante.perfil.destroy');
+    // HU-17: Cancelar Solicitud
+    Route::patch('/solicitudes/{solicitud}/cancelar', [SolicitudController::class, 'cancelar'])->name('adoptante.solicitudes.cancelar');
 });
 
 // =========================================================================
