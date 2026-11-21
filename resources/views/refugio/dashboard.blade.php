@@ -39,7 +39,7 @@
             </div>
 
             {{-- Contenido original (conservado) --}}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 mb-8">
                 <h3 class="text-lg font-bold mb-4">Bienvenido, {{ auth()->user()->name }}</h3>
 
                 @if(session('success'))
@@ -57,6 +57,54 @@
                     </a>
                 </div>
             </div>
+
+            {{-- Listado de Publicaciones (HU-12 y HU-13) --}}
+            <h4 class="text-xl font-bold mb-4 text-gray-800">Mis Publicaciones</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @forelse(auth()->user()->refugio->publicaciones as $publicacion)
+                    <div class="bg-white border border-gray-200 rounded-lg p-4 flex flex-col justify-between shadow-sm">
+                        <div>
+                            <img src="{{ asset('storage/' . $publicacion->foto) }}" class="w-full h-40 object-cover rounded mb-3">
+                            <h5 class="font-bold text-lg text-gray-800">{{ $publicacion->especie }} ({{ $publicacion->sexo }})</h5>
+                            <p class="text-sm text-gray-500 mb-2">{{ $publicacion->edad_aproximada }}</p>
+                            
+                            {{-- Badge de estado --}}
+                            <p class="text-xs font-bold mt-2 uppercase 
+                                {{ $publicacion->estado === 'activa' ? 'text-emerald-600' : 'text-gray-500' }}">
+                                Estado: {{ $publicacion->estado }}
+                            </p>
+                        </div>
+                        
+                        <div class="mt-4 flex items-center justify-end gap-4 border-t pt-3">
+                            {{-- Botón Editar (HU-12) --}}
+                            @if($publicacion->estado !== 'baja')
+                                <a href="{{ route('refugio.publicaciones.edit', $publicacion) }}" class="text-blue-600 text-sm font-semibold hover:underline">
+                                    Editar
+                                </a>
+                            @endif
+
+                            {{-- Botón Dar de Baja (HU-13) --}}
+                            @if($publicacion->estado !== 'baja')
+                                <form method="POST" action="{{ route('refugio.publicaciones.destroy', $publicacion) }}" onsubmit="return confirm('¿Seguro que querés dar de baja esta publicación? Se perderá de la vista pública.');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <input type="hidden" name="motivo_baja" value="Baja solicitada por el refugio.">
+                                    <button type="submit" class="text-red-600 text-sm font-semibold hover:underline">
+                                        Dar de Baja
+                                    </button>
+                                </form>
+                            @else
+                                <span class="text-xs text-gray-400 italic">Publicación dada de baja</span>
+                            @endif
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-span-3 bg-white p-6 rounded-lg text-center border">
+                        <p class="text-gray-500">No tenés publicaciones todavía.</p>
+                    </div>
+                @endforelse
+            </div>
+
         </div>
     </div>
 </x-app-layout>

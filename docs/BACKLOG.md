@@ -18,7 +18,7 @@ Este documento es la hoja de ruta del proyecto.
 *   **HU-10 ⏳ (Editar/Bloquear Refugio):** Admin puede editar datos del refugio o bloquearlo (si se bloquea, sus publicaciones pasan a estado "baja").
 *   **HU-11 ✅ (Crear Publicación):** Refugio sube foto de mascota...create`*.
 *   **HU-12 ✅ (Editar Publicación):** Refugio edita foto o datos de su publicación.
-*   **HU-13 ⏳ (Baja Publicación):** Refugio da de baja lógica una publicación con un motivo (ej: falleció).
+*   **HU-13 ✅ (Baja Publicación):** Refugio da de baja lógica una publicación con un motivo (ej: falleció).
 *   **HU-14 ✅ (Listado Público):** Visitantes ven publicaciones `activas`. Paginación de 12.
 *   **HU-15 ✅ (Detalle Público):** Visitante ve detalle. Botón "Solicitar adopción" (solo adoptantes logueados).
 

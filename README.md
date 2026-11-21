@@ -209,3 +209,26 @@ Cada vez que tomes una HU de Jira/GitHub Projects, seguí este flujo estándar p
 1. **SoftDeletes:** Trait de Laravel para borrado lógico.
 2. **Transaction Script:** Uso de `DB::transaction` para asegurar la integridad de los datos.
 3. **MVC:** Lógica en el Controlador y botón de acción en la Vista.
+
+### HU-17: Cancelar Solicitud de Adopción
+**Solución Implementada:**
+* Se añadió el método `cancelar` al `Adoptante\SolicitudController`.
+* **Seguridad:** Se validó que el adoptante solo pueda cancelar sus propias solicitudes (403 si intenta cancelar una ajena).
+* **Regla de Negocio:** Solo se permite cancelar solicitudes en estado `pendiente`. Al cancelar, el estado cambia a `cancelada` y se registra el motivo.
+* **Transaction Script:** Uso de `DB::transaction` para garantizar que, si la publicación había alcanzado el límite de 3 solicitudes (estado `completa`), al cancelar una, la publicación vuelva automáticamente al estado `activa` (liberando el cupo para otro adoptante).
+
+**Patrones de Diseño:**
+1. **Transaction Script:** Para coordinar la actualización de la solicitud y la publicación de forma atómica.
+2. **Active Record:** Uso de `$solicitud->update()` y `$publicacion->update()`.
+3. **MVC:** Lógica en el controlador y botón de acción en la vista del dashboard.
+
+### HU-13: Baja de Publicación (Refugio)
+**Solución Implementada:**
+* Se añadió el método `destroy` al `Refugio\PublicacionController`.
+* **Seguridad:** Se validó la pertenencia (403 si el refugio intenta borrar la mascota de otro).
+* **Regla de Negocio:** Se solicita un "motivo de baja" antes de ocultar la publicación.
+* **SoftDeletes:** La publicación no se elimina físicamente de la base de datos, sino que se marca con `deleted_at` para conservar el historial. El estado cambia a `baja`.
+
+**Patrones de Diseño:**
+1. **SoftDeletes:** Para conservar el historial y permitir restauraciones (como hace el Admin en la HU-27).
+2. **Active Record:** Uso de `update()` y `delete()` sobre el modelo.
